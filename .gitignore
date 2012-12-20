@@ -1,0 +1,9 @@
+*.pyc
+*.cache
+*~
+
+
+addons.make
+config.make
+notes.md
+
