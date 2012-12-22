@@ -8,17 +8,18 @@ import subprocess
 logger = logging.getLogger(__name__)
 
 def validate_git_repo(strict=True):
-	"""Validate if current directory is a git repo."""
+	"""Validate if current directory is in a git repo."""
 	
-	logger.debug('Checking if git repository')
-	#TODO: this does not catch if being in an ignored folder inside a git repo
-	# one approach: parse git clean -ndx
-	if subprocess.call(['git', 'rev-parse']) == 0: 
+	logger.debug('Checking if in a git repository?')
+	# python3.3 offers subpocess.DEVNULL for output redirection
+	if (subprocess.call(['git','rev-parse']) == 0) and (subprocess.call('git clean -xnd `pwd` | grep "Would remove \./" > /dev/null',shell=True) == 1):
+	# we are in a git repository, but not in an ignored directory inside a git repo (i.e. in OF/addons)
+		logger.debug('Yes, this is in a git repository.')
 		if subprocess.call(['git','diff','--quiet','HEAD']) != 0:
-			logger.error('OF git repository has uncommitted changes, commit those before recording!')
+			logger.error('Repository has uncommitted changes, commit those before continuing!')
 			return 1
 		else:
-			logger.debug('OF repo clean')
+			logger.debug('Repository clean')
 			return 0
 	else:
 		if strict is True:
@@ -93,7 +94,7 @@ def record(args):
 	logger.debug(addons_dict)
 	
 	#TODO: go to project directory, put info into file. 
-	#TODO: decide on file type
+	#TODO: use JSON
 
 	return 0
 	
