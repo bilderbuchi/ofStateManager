@@ -1,0 +1,66 @@
+{
+ "snapshots": [
+  {
+   "addons": [
+    {
+     "name": "firstAddon", 
+     "sha": "ab234234"
+    }, 
+    {
+     "name": "secondAddon", 
+     "sha": "no-git"
+    }
+   ], 
+   "core": {
+    "path": "OF", 
+    "sha": "AE21327"
+   }, 
+   "date": "2012-12-15", 
+   "name": "structure-proposition"
+  }, 
+  {
+   "addons": [
+    {
+     "name": "ofxUI", 
+     "sha": "86c26c0906da45ce633d005dda0c4c7772b02bd4"
+    }, 
+    {
+     "name": "../../openFrameworks/addons/ofxControlPanel", 
+     "sha": "3e63090019c0c4f7308d78913f71023d565b4799"
+    }, 
+    {
+     "name": "ofxNonGitAddon", 
+     "sha": "no-git"
+    }
+   ], 
+   "core": {
+    "path": "../openFrameworks", 
+    "sha": "e0cf5fe601b45e08333ca460f603a6363164b426"
+   }, 
+   "date": "2012-12-22T19:21:33.354106", 
+   "name": "anothertest"
+  }, 
+  {
+   "addons": [
+    {
+     "name": "ofxUI", 
+     "sha": "86c26c0906da45ce633d005dda0c4c7772b02bd4"
+    }, 
+    {
+     "name": "../../openFrameworks/addons/ofxControlPanel", 
+     "sha": "3e63090019c0c4f7308d78913f71023d565b4799"
+    }, 
+    {
+     "name": "ofxNonGitAddon", 
+     "sha": "no-git"
+    }
+   ], 
+   "core": {
+    "path": "../openFrameworks", 
+    "sha": "e0cf5fe601b45e08333ca460f603a6363164b426"
+   }, 
+   "date": "2012-12-22T19:24:19.415877", 
+   "name": "latest"
+  }
+ ]
+}

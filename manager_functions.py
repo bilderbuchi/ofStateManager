@@ -4,6 +4,9 @@ import logging
 import os
 import sys
 import subprocess
+import json
+import errno
+from datetime import datetime
 
 logger = logging.getLogger(__name__)
 
@@ -23,15 +26,16 @@ def validate_git_repo(strict=True):
 			return 0
 	else:
 		if strict is True:
-			logger.error(os.getcwd() + ' is not in a git repository!')
+			logger.error('Not in a git repository: ' + os.getcwd())
 			return 1
 		else:
-			logger.warning(os.getcwd() + ' is not in a git repository!')
+			logger.warning('Not in a git repository: ' + os.getcwd())
 			return 2
 
 def record(args):
 	logger.debug('In subcommand record.')
 	os.chdir(args.project)
+	projectpath=os.getcwd()
 	
 	# parse addons.make into a list of addons
 	# TODO: use with here
@@ -55,18 +59,18 @@ def record(args):
 	if len(OF_path) == 0:
 		logger.error('Did not find OF location in config.make in ' + os.getcwd())
 		config_make.close()
-		os.chdir(args.project)
 		sys.exit('Aborting.')
 	config_make.close()
 	
 	logger.info('Processing OF')
 	os.chdir(OF_path)
+	core_dict={'path': OF_path}
 	if validate_git_repo() !=0:
 		sys.exit('Aborting.')
 		
 	logger.debug('Recording commit SHA')
-	OF_commit_SHA=subprocess.check_output(['git','rev-parse','HEAD']).strip()
-	logger.debug('OF commit SHA: '+ OF_commit_SHA)
+	core_dict['sha']=subprocess.check_output(['git','rev-parse','HEAD']).strip()
+	logger.debug('OF commit SHA: '+ core_dict['sha'])
 	
 	logger.info('Processing addons')
 	addons_path=os.path.join(os.getcwd(),'addons')
@@ -79,26 +83,67 @@ def record(args):
 				official_addons.append(line[1:].strip())
 	# prune official addons (which are in the OF repo already
 	# not very efficient (better with sets), but irrelevant for the small lists we expect
-	addons_list = [x for x in addons_list if x not in official_addons]
-	addons_dict = dict.fromkeys(addons_list)
-	for k,v in addons_dict.iteritems():
-		logger.info('Processing addon ' + k)
-		os.chdir(os.path.join(addons_path,k))
+	addons_list = [{'name': x} for x in addons_list if x not in official_addons]
+#	addons_dict = dict.fromkeys(addons_list)
+	for addon in addons_list:
+		logger.info('Processing addon ' + addon['name'])
+		try:
+			os.chdir(os.path.join(addons_path,addon['name']))
+		except Exception as e:
+			if e.errno == errno.ENOENT:
+				logger.error(addon['name'] + ' does not exist at ' + addons_path + '. Aborting.')
+				sys.exit('Aborting')
+			else:
+				logger.error('error: ' + str(e))
+			
 		ret= validate_git_repo(strict=False)
 		if ret == 0:
-			addons_dict[k] = subprocess.check_output(['git','rev-parse','HEAD']).strip()
+			addon['sha'] = subprocess.check_output(['git','rev-parse','HEAD']).strip()
 		elif ret == 2:
-			addons_dict[k] = 'no-git'
+			addon['sha'] = 'non-git'
 		else:
 			sys.exit('Aborting.')
-	logger.debug(addons_dict)
+#	logger.debug(addons_list)
 	
-	#TODO: go to project directory, put info into file. 
-	#TODO: use JSON
+	logger.info('Storing metadata')
+	filename='metadata.json'
+	os.chdir(projectpath)
+	
+	# Open/initialise metadata file
+	try:
+		with open(filename,'r') as metafile:
+			json_object = json.load(metafile)
+			logger.info('loaded data from ' + filename)
+			logger.debug(json_object)
+			# update with data
+	except IOError as e:
+		if e.errno == errno.ENOENT:
+			logger.info(filename + ' does not exist. Creating..')
+			open(filename,'w').close()
+			# create new skeleton json_object
+			json_object=json.loads('{ "snapshots": [] }')
+		else:
+			logger.error('Could not open file: ' + e)
+			sys.exit('Aborting')
+	
+	# Store/update metadata
+	# check if snapshot entry already exists
+	for entry in json_object['snapshots']:
+		if entry['name'] == args.name:
+			if (args.update is False) and (args.name is not 'latest'):
+				logger.error(args.name + ': entry with the same name already exists. Use -u option to overwrite.')
+				sys.exit('Aborting')
+			json_object['snapshots'].remove(entry)
+	
+	# write updated entry
+	temp= {'name': args.name, 'date': datetime.now().isoformat(), 'core': core_dict, 'addons': addons_list}
+	json_object['snapshots'].append(temp)
+	
+	logger.info('Writing updated data to ' + filename)
+	with open(filename,'w') as metafile:
+		json.dump(json_object, metafile,indent=1,sort_keys=True)
 
 	return 0
-	
-
 
     
 def checkout(args):
