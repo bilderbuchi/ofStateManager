@@ -145,6 +145,12 @@ def record(args):
 
 	return 0
 
+def archive(args):
+	logger.debug('In subcommand archive.')
+	logger.error('This is not yet implemented.')
+	sys.exit('Aborting')
+	return 0
+
     
 def checkout(args):
 	logger.debug('In subcommand checkout.')
@@ -154,8 +160,4 @@ def checkout(args):
 
 
 
-def collect(args):
-	logger.debug('In subcommand collect.')
-	logger.error('This is not yet implemented.')
-	sys.exit('Aborting')
-	return 0
+

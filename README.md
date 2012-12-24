@@ -19,7 +19,7 @@ The metadata.json file is designed so that other information (e.g. dependencies)
 ##Usage
 
 This python script comes with help texts. 
-It has 3 subcommands: `record`, `checkout`, `collect`. 
+It has 3 subcommands: `record`, `checkout`, `archive`. 
 Call up their help texts by supplying the `-h` argument (e.g. `ofStateManager record -h`, just like git).
 
 ## Requirements/Dependencies
