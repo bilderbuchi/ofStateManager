@@ -31,6 +31,23 @@ def validate_git_repo(strict=True):
 		else:
 			logger.warning('Not in a git repository: ' + os.getcwd())
 			return 2
+		
+def git_archive_repo(archivename, archivepath, repopath, repo_sha):
+	try:
+		with open(archivename,'r') as archivefile:
+			logger.info(archivename + ' already exists. Skipping ...')
+	except IOError as e:
+		if e.errno == errno.ENOENT:
+			os.chdir(archivepath)
+			logger.info('Archiving ' + archivename)
+			os.chdir(repopath)
+			# git archive --format=tar.gz --output=arch.tar.gz --remote=./openFrameworks/ sha
+			subprocess.call(['git','archive','--format=tar.gz','--output='+os.path.abspath(os.path.join(archivepath,archivename)),'--prefix='+os.path.basename(repopath)+'/',repo_sha])
+			# TODO: this doesn't work with remote, since git repos don't allow clients access to arbitrary sha's, only named ones.
+			# solution: go to repo directory, use -o to put into right path
+			# cf. http://git.661346.n2.nabble.com/Passing-commit-IDs-to-git-archive-td7359753.html
+			# TODO: error catching
+			os.chdir(archivepath)
 
 def record(args):
 	logger.debug('In subcommand record.')
@@ -115,7 +132,6 @@ def record(args):
 			json_object = json.load(metafile)
 			logger.info('loaded data from ' + filename)
 			logger.debug(json_object)
-			# update with data
 	except IOError as e:
 		if e.errno == errno.ENOENT:
 			logger.info(filename + ' does not exist. Creating..')
@@ -123,7 +139,7 @@ def record(args):
 			# create new skeleton json_object
 			json_object=json.loads('{ "snapshots": [] }')
 		else:
-			logger.error('Could not open file: ' + e)
+			logger.error('Could not open file: ' + str(e))
 			sys.exit('Aborting')
 	
 	# Store/update metadata
@@ -147,10 +163,97 @@ def record(args):
 
 def archive(args):
 	logger.debug('In subcommand archive.')
-	logger.error('This is not yet implemented.')
-	sys.exit('Aborting')
-	return 0
+	basedir=os.getcwd()
+	os.chdir(args.project)
+	projectpath=os.getcwd()	
+	filename='metadata.json'
+	
+	logger.debug('Opening metadata file')
+	try:
+		with open(filename,'r') as metafile:
+			json_object = json.load(metafile)
+			logger.info('loaded data from ' + filename)
+			logger.debug(json_object)
+			# update with data
+	except IOError as e:
+		if e.errno == errno.ENOENT:
+			logger.error('Metadata file ' + filename + ' does not yet exist. Creating...')
+			os.chdir(basedir)
+			if record(args) == 0:
+				os.chdir(basedir)
+				return archive(args) # call archive recursively
+			else:
+				logger.error('Creation of snapshot ' + args.name + 'failed.')
+				sys.exit('Aborting')
+				return 1
+		else:
+			logger.error('Error opening metadata file ' + filename + ': ' + str(e))
+			sys.exit('Aborting')
+			return 1			
+		
+	# check if snapshot entry already exists
+	entry_exists=False
+	for entry in json_object['snapshots']:
+		if entry['name'] == args.name:
+			logger.info('Selecting snapshot '+ args.name)
+			entry_exists=True
+			break
+		
+	if not entry_exists:
+		logger.info('Entry ' + args.name + ' does not exist yet. Creating...')
+		os.chdir(basedir)
+		if record(args) == 0:
+			os.chdir(basedir)
+			return archive(args) # call archive recursively
+		else:
+			logger.error('Creation of snapshot ' + args.name + 'failed.')
+			sys.exit('Aborting')
+			return 1
+	#--------------------------------------------------------------------------
+	else:
+		# entry exists, start archiving
+		# create subdirectory for archive
+		archivedirectory=os.path.basename(projectpath)+'_archive'
+		try:
+			os.mkdir(archivedirectory)
+		except OSError as e:
+			if e.errno != errno.EEXIST:
+				logger.error('Could not create directory: ' + archivedirectory + ': ' + str(e))
+				sys.exit('Aborting')
+		os.chdir(archivedirectory)
+		
+		# archive all elements
+		# OF itself
+		archivename=str(os.path.basename(projectpath))+'_'+entry['name']+'_OF_'+entry['core']['sha'][0:7]+'.tar.gz'
+		repopath=os.path.abspath(os.path.join(projectpath,entry['core']['path']))
+		git_archive_repo(archivename, os.getcwd(), repopath, entry['core']['sha'])
+		
+		# addons
+		for addon in entry['addons']:
+			logger.info('Archiving addon '+addon['name'])
+			archivename=str(os.path.basename(projectpath))+'_'+entry['name']+'_'+os.path.basename(addon['name'])+'_'+addon['sha'][0:7]+'.tar.gz'
+			repopath=os.path.abspath(os.path.join(projectpath,entry['core']['path'],'addons',addon['name']))
+			if addon['sha'] != 'non-git':
+				git_archive_repo(archivename, os.getcwd(), repopath, addon['sha'])
+			else:
+				logger.info(addon['name']+ ' is not a git repo. Packing as tar.gz file.')
+				subprocess.call(['tar','-zcf',archivename,'--directory='+os.path.dirname(repopath),os.path.basename(repopath)])
 
+	# advantages:
+	# archive necessary OF and addons files into project directory.
+	# can then be copied away for a self-contained snapshot (including project git history)
+	# tar.gz smallest, OF is ~220MB
+	
+	# disadvantages: 
+	# does not copy full repo, only snapshot - loses git history
+	# relative folder structure not preserved (but that's probably impossible) - should also contain contents text file explaining that
+	# can't checkout directly from that - some manual work needed (copy project to old place, place non-git addons accordingly, get git-addons beforehand)
+	# does not strictly archive only _needed_ files, but that would be much more complex (parse project files, etc)
+		
+	# questions & pitfalls:
+	# possibly: option to copy full git repo?
+	# archiveing the project, too, doesn't preserve project git repo - bad 	
+		return 0
     
 def checkout(args):
 	logger.debug('In subcommand checkout.')
