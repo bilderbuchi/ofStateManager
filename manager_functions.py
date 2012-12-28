@@ -10,13 +10,14 @@ from datetime import datetime
 
 logger = logging.getLogger(__name__)
 
+###############################################################################
 def validate_git_repo(strict=True):
 	"""Validate if current directory is in a git repo."""
 	
 	logger.debug('Checking if in a git repository?')
 	# python3.3 offers subpocess.DEVNULL for output redirection
 	if (subprocess.call(['git','rev-parse']) == 0) and (subprocess.call('git clean -xnd `pwd` | grep "Would remove \./" > /dev/null',shell=True) == 1):
-	# we are in a git repository, but not in an ignored directory inside a git repo (i.e. in OF/addons)
+	# we are in a git repository, but not in an ignored directory inside a git repo (i.e. in OF/addons/someAddon)
 		logger.debug('Yes, this is in a git repository.')
 		if subprocess.call(['git','diff','--quiet','HEAD']) != 0:
 			logger.error('Repository has uncommitted changes, commit those before continuing!')
@@ -31,7 +32,8 @@ def validate_git_repo(strict=True):
 		else:
 			logger.warning('Not in a git repository: ' + os.getcwd())
 			return 2
-		
+
+###############################################################################		
 def git_archive_repo(archivename, archivepath, repopath, repo_sha):
 	try:
 		with open(archivename,'r') as archivefile:
@@ -42,13 +44,14 @@ def git_archive_repo(archivename, archivepath, repopath, repo_sha):
 			logger.info('Archiving ' + archivename)
 			os.chdir(repopath)
 			# git archive --format=tar.gz --output=arch.tar.gz --remote=./openFrameworks/ sha
-			subprocess.call(['git','archive','--format=tar.gz','--output='+os.path.abspath(os.path.join(archivepath,archivename)),'--prefix='+os.path.basename(repopath)+'/',repo_sha])
+			subprocess.call(['git','archive','--format=tar.gz','--output='+os.path.abspath(os.path.join(archivepath,archivename)),'--prefix='+os.path.basename(repopath)+os.sep,repo_sha])
 			# TODO: this doesn't work with remote, since git repos don't allow clients access to arbitrary sha's, only named ones.
 			# solution: go to repo directory, use -o to put into right path
 			# cf. http://git.661346.n2.nabble.com/Passing-commit-IDs-to-git-archive-td7359753.html
 			# TODO: error catching
 			os.chdir(archivepath)
 
+###############################################################################
 def record(args):
 	logger.debug('In subcommand record.')
 	os.chdir(args.project)
@@ -161,6 +164,7 @@ def record(args):
 
 	return 0
 
+###############################################################################
 def archive(args):
 	logger.debug('In subcommand archive.')
 	basedir=os.getcwd()
@@ -239,24 +243,23 @@ def archive(args):
 				logger.info(addon['name']+ ' is not a git repo. Packing as tar.gz file.')
 				subprocess.call(['tar','-zcf',archivename,'--directory='+os.path.dirname(repopath),os.path.basename(repopath)])
 
-	# advantages:
-	# archive necessary OF and addons files into project directory.
-	# can then be copied away for a self-contained snapshot (including project git history)
-	# tar.gz smallest, OF is ~220MB
-	
-	# disadvantages: 
-	# does not copy full repo, only snapshot - loses git history
-	# relative folder structure not preserved (but that's probably impossible) - should also contain contents text file explaining that
-	# can't checkout directly from that - some manual work needed (copy project to old place, place non-git addons accordingly, get git-addons beforehand)
-	# does not strictly archive only _needed_ files, but that would be much more complex (parse project files, etc)
-		
-	# questions & pitfalls:
-	# possibly: option to copy full git repo?
-	# archiveing the project, too, doesn't preserve project git repo - bad 	
 		return 0
-    
+
+###############################################################################
 def checkout(args):
 	logger.debug('In subcommand checkout.')
+	basedir=os.getcwd()
+	os.chdir(args.project)
+	projectpath=os.getcwd()	
+	filename='metadata.json'
+	
+	# open metadata.json, abort on error
+	# search for entry, if unknown abort
+	# parse entry
+	# make sure all components have clean repos, skip non-git
+	# checkout given sha, skip non-git
+	# warn about unknown non-git components 
+	
 	logger.error('This is not yet implemented.')
 	sys.exit('Aborting')
 	return 0

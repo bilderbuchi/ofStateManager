@@ -27,7 +27,7 @@ checkout_parser.set_defaults(func=mgr.checkout)
 archive_parser = subparsers.add_parser('archive', help='Archive all relevant components for the named or latest state', parents=[parent_parser])
 # target actually doesn't make much sense - should go into project directory anyway
 # archive_parser.add_argument('-t', '--target', default=getcwd(), help='Target path where to place the archive directory, defaults to current directory')
-archive_parser.add_argument('-f', '--force', action='store_true', help='When no name is given, ignore warning, check out "latest"')
+#archive_parser.add_argument('-f', '--force', action='store_true', help='When no name is given, ignore warning, check out "latest"')
 archive_parser.set_defaults(func=mgr.archive)
 
 #args=parser.parse_args()
