@@ -55,6 +55,17 @@ def git_archive_repo(archivename, archivepath, repopath, repo_sha):
 			# cf. http://git.661346.n2.nabble.com/Passing-commit-IDs-to-git-archive-td7359753.html
 			# TODO: error catching
 			os.chdir(archivepath)
+			
+###############################################################################
+def check_for_snapshot_entry(name,json_object):
+	"""Return snapshot entry if it already exists."""
+	return_entry={}
+	for entry in json_object['snapshots']:
+		if entry['name'] == name:
+			logger.info('Selecting snapshot '+ name)
+			return_entry=entry
+			break
+	return return_entry
 
 ###############################################################################
 def record(args, filename):
@@ -193,19 +204,14 @@ def archive(args, filename):
 			sys.exit('Aborting')
 			return 1			
 		
-	# check if snapshot entry already exists
-	entry_exists=False
-	for entry in json_object['snapshots']:
-		if entry['name'] == args.name:
-			logger.info('Selecting snapshot '+ args.name)
-			entry_exists=True
-			break
-	if not entry_exists:
+	# check if snapshot entry already exists, if not create it
+	entry = check_for_snapshot_entry(args.name,json_object)
+	if not entry:
 		logger.info('Entry ' + args.name + ' does not exist yet. Creating...')
 		os.chdir(basedir)
-		if record(args) == 0: # call record to create the necessary entry
+		if record(args,filename) == 0: # call record to create the necessary entry
 			os.chdir(basedir)
-			return archive(args) # call archive recursively
+			return archive(args,filename) # call archive recursively
 		else:
 			logger.error('Creation of snapshot ' + args.name + 'failed.')
 			sys.exit('Aborting')
@@ -250,7 +256,22 @@ def checkout(args, filename):
 	projectpath=os.getcwd()	
 	
 	# open metadata.json, abort on error
-	# search for entry, if unknown abort
+	try:
+		with open(filename,'r') as metafile:
+			json_object = json.load(metafile)
+			logger.info('Loaded json data from ' + filename)
+			logger.debug(json_object)
+	except IOError as e:
+			logger.error('Could not open file: ' + str(e))
+			sys.exit('Aborting')
+			return 1
+		
+	entry = check_for_snapshot_entry(args.name,json_object)
+	if not entry:
+		logger.error('Snapshot entry '+args.name+' does not exist.')
+		sys.exit('Aborting')
+		return 1
+	
 	# parse entry
 	# make sure all components have clean repos, skip non-git
 	# checkout given sha, skip non-git
