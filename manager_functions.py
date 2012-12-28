@@ -58,29 +58,25 @@ def record(args):
 	projectpath=os.getcwd()
 	
 	# parse addons.make into a list of addons
-	# TODO: use with here
-	addons_make = open('addons.make','r')
-	#TODO: use dict from beginning
-	addons_list=[]
-	for l in addons_make.readlines():
-		addons_list.append(l.rstrip())
-	if len(addons_list) is 0:
-		logger.info('No addons found.')
-	addons_make.close()
+	with open('addons.make','r') as addons_make:
+		#TODO: use dict from beginning
+		addons_list=[]
+		for l in addons_make.readlines():
+			addons_list.append(l.rstrip())
+		if len(addons_list) is 0:
+			logger.info('No addons found.')
 	
 	# search config.make for OF location
-	# TODO: use with here
-	config_make = open('config.make','r')
-	OF_path=''
-	for l in config_make.readlines():
-		if 'OF_ROOT =' in l:
-			OF_path=l.split('=',1)[-1].strip()
-			break
-	if len(OF_path) == 0:
-		logger.error('Did not find OF location in config.make in ' + os.getcwd())
-		config_make.close()
-		sys.exit('Aborting.')
-	config_make.close()
+	with open('config.make','r') as config_make:
+		OF_path=''
+		for l in config_make.readlines():
+			if 'OF_ROOT =' in l:
+				OF_path=l.split('=',1)[-1].strip()
+				break
+		if len(OF_path) == 0:
+			logger.error('Did not find OF location in config.make in ' + os.getcwd())
+			config_make.close()
+			sys.exit('Aborting.')
 	
 	logger.info('Processing OF')
 	os.chdir(OF_path)
@@ -101,10 +97,10 @@ def record(args):
 		for line in g:
 			if line.startswith('!ofx'):
 				official_addons.append(line[1:].strip())
-	# prune official addons (which are in the OF repo already
+	# prune official addons (which are in the OF repo already)
 	# not very efficient (better with sets), but irrelevant for the small lists we expect
 	addons_list = [{'name': x} for x in addons_list if x not in official_addons]
-#	addons_dict = dict.fromkeys(addons_list)
+	
 	for addon in addons_list:
 		logger.info('Processing addon ' + addon['name'])
 		try:
@@ -123,7 +119,6 @@ def record(args):
 			addon['sha'] = 'non-git'
 		else:
 			sys.exit('Aborting.')
-#	logger.debug(addons_list)
 	
 	logger.info('Storing metadata')
 	filename='metadata.json'
@@ -202,11 +197,10 @@ def archive(args):
 			logger.info('Selecting snapshot '+ args.name)
 			entry_exists=True
 			break
-		
 	if not entry_exists:
 		logger.info('Entry ' + args.name + ' does not exist yet. Creating...')
 		os.chdir(basedir)
-		if record(args) == 0:
+		if record(args) == 0: # call record to create the necessary entry
 			os.chdir(basedir)
 			return archive(args) # call archive recursively
 		else:
