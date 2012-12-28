@@ -12,7 +12,10 @@ logger = logging.getLogger(__name__)
 
 ###############################################################################
 def validate_git_repo(strict=True):
-	"""Validate if current directory is in a git repo."""
+	"""Validate if current directory is in a git repo.
+	
+	Return 0 on success, 1 on error if not in a git repo, 
+	2 for warning about not being in a git repo"""
 	
 	logger.debug('Checking if in a git repository?')
 	# python3.3 offers subpocess.DEVNULL for output redirection
@@ -35,6 +38,8 @@ def validate_git_repo(strict=True):
 
 ###############################################################################		
 def git_archive_repo(archivename, archivepath, repopath, repo_sha):
+	"""Archive a git repo snapshot in the given archive file."""
+	
 	try:
 		with open(archivename,'r') as archivefile:
 			logger.info(archivename + ' already exists. Skipping ...')
@@ -45,14 +50,14 @@ def git_archive_repo(archivename, archivepath, repopath, repo_sha):
 			os.chdir(repopath)
 			# git archive --format=tar.gz --output=arch.tar.gz --remote=./openFrameworks/ sha
 			subprocess.call(['git','archive','--format=tar.gz','--output='+os.path.abspath(os.path.join(archivepath,archivename)),'--prefix='+os.path.basename(repopath)+os.sep,repo_sha])
-			# TODO: this doesn't work with remote, since git repos don't allow clients access to arbitrary sha's, only named ones.
-			# solution: go to repo directory, use -o to put into right path
+			# This doesn't work with the remote option, since git repos don't allow clients access to arbitrary sha's, only named ones.
+			# Solution: go to repo directory, use -o to put resulting file into right path
 			# cf. http://git.661346.n2.nabble.com/Passing-commit-IDs-to-git-archive-td7359753.html
 			# TODO: error catching
 			os.chdir(archivepath)
 
 ###############################################################################
-def record(args):
+def record(args, filename):
 	logger.debug('In subcommand record.')
 	os.chdir(args.project)
 	projectpath=os.getcwd()
@@ -121,7 +126,6 @@ def record(args):
 			sys.exit('Aborting.')
 	
 	logger.info('Storing metadata')
-	filename='metadata.json'
 	os.chdir(projectpath)
 	
 	# Open/initialise metadata file
@@ -160,12 +164,11 @@ def record(args):
 	return 0
 
 ###############################################################################
-def archive(args):
+def archive(args, filename):
 	logger.debug('In subcommand archive.')
 	basedir=os.getcwd()
 	os.chdir(args.project)
 	projectpath=os.getcwd()	
-	filename='metadata.json'
 	
 	logger.debug('Opening metadata file')
 	try:
@@ -240,12 +243,11 @@ def archive(args):
 		return 0
 
 ###############################################################################
-def checkout(args):
+def checkout(args, filename):
 	logger.debug('In subcommand checkout.')
 	basedir=os.getcwd()
 	os.chdir(args.project)
 	projectpath=os.getcwd()	
-	filename='metadata.json'
 	
 	# open metadata.json, abort on error
 	# search for entry, if unknown abort

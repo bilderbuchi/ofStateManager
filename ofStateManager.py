@@ -43,12 +43,15 @@ else:
 	logging.basicConfig(level=logging.INFO) # DEBUG/INFO/WARNING/ERROR/CRITICAL
 
 logger.debug(args)
+metadata_filename='metadata.json' # file where metadata about project resides
+logger.debug('Metadata filename: ' + metadata_filename)
 
 #Main function
 logger.info('Start processing.')
-if args.func(args) is not 0:
-	logger.error('An error occurred during splicing!')
-logger.info('Finished processing!')
+if args.func(args,metadata_filename) is not 0:
+	logger.error('An error occurred! Aborting...')
+else:
+	logger.info('Successfully finished processing!')
 
 #Cleanup
 logging.shutdown()
