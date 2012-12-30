@@ -1,12 +1,10 @@
 # ofStateManager
 
 ## ATTENTION!
-
 Watch out, this is alpha-quality software!
 Don't use on production systems or where losing data may be a problem.
 
 ##Description
-
 This script helps you organize and archive your openFrameworks projects.
 The subcommands `record`, `achive` and `restore` are used for these purposes in conjunction with a metadata file in your project directory.
 
@@ -32,6 +30,26 @@ Please note that the folder structure of your project in relation to OF and addo
 
 ##Usage
 
+### Necessary addons.make and config.make files
+To enable ofStateManager to find the location of OF and the used addons, it needs properly formatted `addons.make` and `config.make` files in the project directory.
+
+However, if you don't have those files, it's easy to make them (or adapt from the sample files in the repo): 
+
+`addons.make` just has a line with the name of every addon used, e.g.
+
+	ofxOsc
+	ofxXmlSettings
+	ofxUI
+
+It can even deal with addons outside of OF, by supplying the path relative to the `OF/addons` directory (e.g. `../../myAddonStorage/someAddon`).
+
+In `config.make`, ofStateManager only searches for the line `OF_ROOT = ../../..` (or whatever the path to OF from the project is), so just add that line and you're good.
+
+This system works irrespective of location of your project relative to OF, only the path to OF in `config.make` in the project has to be correct.
+
+Analysing project files of 3+ different IDEs was out of scope for this script, and it is expected that with the currently ongoing rewrite of the makefile system those files will be much more heavily utilised across all OF-supported platforms.
+
+### Command line arguments
 	usage: ofStateManager.py record [-h] [-p PROJECT] [-n NAME] [-v] [-u]
 
 	optional arguments:
@@ -67,17 +85,19 @@ Please note that the folder structure of your project in relation to OF and addo
 		                    this option is not given
 	  -v, --verbose         Switch on debug logging.
 
-### Examples
 
-* `ofStatemanager.py record` in your project folder records a snapshot of the current state under the default name `latest`
-* `ofStatemanager.py record --name releaseV1.1` records a snapshot of the current state under the given name
-* `ofStatemanager.py record -u --name releaseV1.1` as previous, but updates snapshot if the name already exists
-* `ofStatemanager.py record -v --project <project-path>` records a snapshot in the project in the given directory, additionally printing debug information
-* `ofStatemanager.py archive` archives all necessary components for the project in an archive folder within. If `metadata.json` or the snapshot name don't exist, they are automatically created first.
+
+### Examples
+* `ofStatemanager.py record -p <project-path>` records a snapshot of the current state of the project in the given directory under the default name `latest`.
+* `ofStatemanager.py archive -p <project-path>` archives all necessary components for the project in an archive folder within. If `metadata.json` or the snapshot name don't exist, they are automatically created first.
 * `ofStatemanager.py checkout --name myRelease` restores all related components to the state defined in the snapshot myRelease.
 
-## Requirements/Dependencies
+* `ofStatemanager.py record -v --project <project-path>` records a snapshot of the project in the given directory, additionally printing debug information.
+* `ofStatemanager.py record --name releaseV1.1` records a snapshot of the current state under the given name and aborts if it already exists.
+* `ofStatemanager.py record -u --name releaseV1.1` as previous, but updates the snapshot if it already exists.
+* `ofStatemanager.py record` in your project folder records a snapshot of the current state under the default name `latest`, but this will only work if you put ofStateManager onto your PATH so that your console can find the binary (or you copy the two .py files in the repository over to your project directory.
 
+## Requirements/Dependencies
 * OS: Only Linux is tested, MacOS should work, too. Full cross-platformness is intended.
 * python, argparse 
 * git
@@ -87,7 +107,6 @@ Please note that the folder structure of your project in relation to OF and addo
 * any git repos must not have uncommitted changes, otherwise recording the state becomes meaningless.
 
 ## License
-
 The code in this repository is available under the MIT License (see license.md).
 
 Copyright (c) 2012- Christoph Buchner
