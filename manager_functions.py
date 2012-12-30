@@ -254,6 +254,7 @@ def checkout(args, filename):
 	basedir=os.getcwd()
 	os.chdir(args.project)
 	projectpath=os.getcwd()	
+	non_git_repos=[]
 	
 	# open metadata.json, abort on error
 	try:
@@ -271,16 +272,56 @@ def checkout(args, filename):
 		logger.error('Snapshot entry '+args.name+' does not exist.')
 		sys.exit('Aborting')
 		return 1
+
+	# make sure all components have clean repos before actual operations, skip non-git
+	logger.info('Making sure repos are clean: OF')
+	os.chdir(entry['core']['path'])
+	if validate_git_repo() !=0:
+		sys.exit('Aborting.')
+		return 1
+		
+	logger.info('Making sure repos are clean: addons')
+	addons_path=os.path.join(os.getcwd(),'addons')
+	os.chdir(addons_path)
+	for addon in entry['addons']:
+			logger.info('Processing addon '+addon['name'])
+			if addon['sha'] == 'non-git':
+				logger.info('Skipping non-git addon '+addon['name'])
+				non_git_repos.append(addon['name'])
+			else:
+				os.chdir(addon['name'])
+				if validate_git_repo() != 0:
+					sys.exit('Aborting')
+					return 1
+				os.chdir(addons_path)
 	
-	# parse entry
-	# make sure all components have clean repos, skip non-git
-	# checkout given sha, skip non-git
-	# warn about unknown non-git components 
+	logger.info('Checking out openFrameworks')
+	# TODO: check for named refs first to avoid unnecessarily detached heads
+	logger.info('Checking out '+entry['core']['sha']+' of '+ entry['core']['path'])
+	os.chdir(projectpath)
+	os.chdir(entry['core']['path'])
+	if subprocess.call(['git','checkout',entry['core']['sha']]) != 0:
+		logger.error('An error occured checking out'+entry['core']['path'])
+		sys.exit('Aborting')
+		return 1
 	
-	logger.error('This is not yet implemented.')
-	sys.exit('Aborting')
+	logger.info('Checking out addons')
+	os.chdir(addons_path)
+	for addon in entry['addons']:
+			if addon['sha'] == 'non-git':
+				logger.info('Skipping non-git addon '+addon['name'])
+			else:
+				logger.info('Checking out '+addon['sha']+' of '+ addon['name'])
+				os.chdir(addon['name'])
+				if subprocess.call(['git','checkout',addon['sha']]) != 0:
+					logger.error('An error occured checking out' + addon['name'])
+					sys.exit('Aborting')
+					return 1
+				os.chdir(addons_path)
+	logger.info('Finished checking out snapshot '+entry['name'])
+	if non_git_repos:
+		logger.warning('The following addons not under git control were found. Correct code state cannot be guaranteed!')
+		for item in non_git_repos:
+			logger.warning(str(item))
+	
 	return 0
-
-
-
-
