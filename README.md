@@ -44,10 +44,12 @@ However, if you don't have those files, it's easy to make them (or adapt from th
 It can even deal with addons outside of OF, by supplying the path relative to the `OF/addons` directory (e.g. `../../myAddonStorage/someAddon`).
 
 In `config.make`, ofStateManager only searches for the line `OF_ROOT = ../../..` (or whatever the path to OF from the project is), so just add that line and you're good.
-
 This system works irrespective of location of your project relative to OF, only the path to OF in `config.make` in the project has to be correct.
 
 Analysing project files of 3+ different IDEs was out of scope for this script, and it is expected that with the currently ongoing rewrite of the makefile system those files will be much more heavily utilised across all OF-supported platforms.
+
+#### Note for IDE users (XCode, CodeBlocks, Visual Studio,...)
+This script relies on an up-to-date `addons.make` file, so if you include addons in any other way, e.g. by drag-and-dropping in your IDE of choice, **make sure that the entries in `addons.make` are in sync with the project**, otherwise the script won't see the other addons you use.
 
 ### Command line arguments
 	usage: ofStateManager.py record [-h] [-p PROJECT] [-n NAME] [-v] [-u]
