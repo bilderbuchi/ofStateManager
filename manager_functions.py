@@ -55,6 +55,8 @@ def git_archive_repo(archivename, archivepath, repopath, repo_sha):
 			# cf. http://git.661346.n2.nabble.com/Passing-commit-IDs-to-git-archive-td7359753.html
 			# TODO: error catching
 			os.chdir(archivepath)
+		else:
+			raise
 			
 ###############################################################################
 def check_for_snapshot_entry(name,json_object):
@@ -126,7 +128,7 @@ def record(args, filename):
 				logger.error(addon['name'] + ' does not exist at ' + addons_path + '. Aborting.')
 				sys.exit('Aborting')
 			else:
-				logger.error('error: ' + str(e))
+				raise
 			
 		ret= validate_git_repo(strict=False)
 		if ret == 0:
@@ -152,8 +154,7 @@ def record(args, filename):
 			# create new skeleton json_object
 			json_object=json.loads('{ "snapshots": [] }')
 		else:
-			logger.error('Could not open file: ' + str(e))
-			sys.exit('Aborting')
+			raise
 	
 	# Store/update metadata
 	# check if snapshot entry already exists
@@ -200,9 +201,7 @@ def archive(args, filename):
 				sys.exit('Aborting')
 				return 1
 		else:
-			logger.error('Error opening metadata file ' + filename + ': ' + str(e))
-			sys.exit('Aborting')
-			return 1			
+			raise
 		
 	# check if snapshot entry already exists, if not create it
 	entry = check_for_snapshot_entry(args.name,json_object)
@@ -224,9 +223,11 @@ def archive(args, filename):
 		try:
 			os.mkdir(archivedirectory)
 		except OSError as e:
-			if e.errno != errno.EEXIST:
+			if e.errno == errno.EEXIST:
+				logger.debug('Directory '+archivedirectory+' already exists. Continuing.')
+			else:
 				logger.error('Could not create directory: ' + archivedirectory + ': ' + str(e))
-				sys.exit('Aborting')
+				raise
 		os.chdir(archivedirectory)
 		
 		# archive all elements
