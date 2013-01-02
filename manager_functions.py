@@ -71,6 +71,10 @@ def check_for_snapshot_entry(name,json_object):
 
 ###############################################################################
 def record(args, filename):
+	"""Record a snapshot in a json file, as specified by arguments in args.
+	
+	Return 0 on success, 1 on failure."""
+	
 	logger.debug('In subcommand record.')
 	os.chdir(args.project)
 	projectpath=os.getcwd()
@@ -93,14 +97,14 @@ def record(args, filename):
 				break
 		if len(OF_path) == 0:
 			logger.error('Did not find OF location in config.make in ' + os.getcwd())
-			config_make.close()
-			sys.exit('Aborting.')
+			return 1
 	
 	logger.info('Processing OF')
 	os.chdir(OF_path)
 	core_dict={'path': OF_path}
 	if validate_git_repo() !=0:
-		sys.exit('Aborting.')
+		logger.error('OF git repo could not be validated successfully.')
+		return 1
 		
 	logger.debug('Recording commit SHA')
 	core_dict['sha']=subprocess.check_output(['git','rev-parse','HEAD']).strip()
@@ -136,7 +140,8 @@ def record(args, filename):
 		elif ret == 2:
 			addon['sha'] = 'non-git'
 		else:
-			sys.exit('Aborting.')
+			logger.error(addon['name'] + ' git repo could not be validated successfully.')
+			return 1
 	
 	logger.info('Storing metadata')
 	os.chdir(projectpath)
@@ -162,7 +167,7 @@ def record(args, filename):
 		if entry['name'] == args.name:
 			if (args.update is False) and (args.name is not 'latest'):
 				logger.error(args.name + ': entry with the same name already exists. Use -u option to overwrite.')
-				sys.exit('Aborting')
+				return 1
 			json_object['snapshots'].remove(entry)
 	
 	# write updated entry
@@ -177,6 +182,9 @@ def record(args, filename):
 
 ###############################################################################
 def archive(args, filename):
+	"""Archive a snapshot from a json file, as specified by arguments in args.
+	
+	Return 0 on success, 1 on failure."""
 	logger.debug('In subcommand archive.')
 	basedir=os.getcwd()
 	os.chdir(args.project)
@@ -191,14 +199,13 @@ def archive(args, filename):
 			# update with data
 	except IOError as e:
 		if e.errno == errno.ENOENT:
-			logger.error('Metadata file ' + filename + ' does not yet exist. Creating...')
+			logger.info('Metadata file ' + filename + ' does not yet exist. Creating...')
 			os.chdir(basedir)
 			if record(args) == 0:
 				os.chdir(basedir)
 				return archive(args) # call archive recursively
 			else:
 				logger.error('Creation of snapshot ' + args.name + 'failed.')
-				sys.exit('Aborting')
 				return 1
 		else:
 			raise
@@ -213,7 +220,6 @@ def archive(args, filename):
 			return archive(args,filename) # call archive recursively
 		else:
 			logger.error('Creation of snapshot ' + args.name + 'failed.')
-			sys.exit('Aborting')
 			return 1
 	#--------------------------------------------------------------------------
 	else:
@@ -251,6 +257,9 @@ def archive(args, filename):
 
 ###############################################################################
 def checkout(args, filename):
+	"""Check out a snapshot from a json file, as specified by arguments in args.
+	
+	Return 0 on success, 1 on failure."""
 	logger.debug('In subcommand checkout.')
 	basedir=os.getcwd()
 	os.chdir(args.project)
@@ -265,20 +274,18 @@ def checkout(args, filename):
 			logger.debug(json_object)
 	except IOError as e:
 			logger.error('Could not open file: ' + str(e))
-			sys.exit('Aborting')
 			return 1
 		
 	entry = check_for_snapshot_entry(args.name,json_object)
 	if not entry:
 		logger.error('Snapshot entry '+args.name+' does not exist.')
-		sys.exit('Aborting')
 		return 1
 
 	# make sure all components have clean repos before actual operations, skip non-git
 	logger.info('Making sure repos are clean: OF')
 	os.chdir(entry['core']['path'])
 	if validate_git_repo() !=0:
-		sys.exit('Aborting.')
+		logger.error('OF git repo could not be validated successfully.')
 		return 1
 		
 	logger.info('Making sure repos are clean: addons')
@@ -292,7 +299,7 @@ def checkout(args, filename):
 			else:
 				os.chdir(addon['name'])
 				if validate_git_repo() != 0:
-					sys.exit('Aborting')
+					logger.error(addon['name']+' git repo could not be validated successfully.')
 					return 1
 				os.chdir(addons_path)
 	
@@ -302,8 +309,7 @@ def checkout(args, filename):
 	os.chdir(projectpath)
 	os.chdir(entry['core']['path'])
 	if subprocess.call(['git','checkout',entry['core']['sha']]) != 0:
-		logger.error('An error occured checking out'+entry['core']['path'])
-		sys.exit('Aborting')
+		logger.error('An error occured checking out '+entry['core']['path'])
 		return 1
 	
 	logger.info('Checking out addons')
@@ -315,8 +321,7 @@ def checkout(args, filename):
 				logger.info('Checking out '+addon['sha']+' of '+ addon['name'])
 				os.chdir(addon['name'])
 				if subprocess.call(['git','checkout',addon['sha']]) != 0:
-					logger.error('An error occured checking out' + addon['name'])
-					sys.exit('Aborting')
+					logger.error('An error occured checking out ' + addon['name'])
 					return 1
 				os.chdir(addons_path)
 	logger.info('Finished checking out snapshot '+entry['name'])

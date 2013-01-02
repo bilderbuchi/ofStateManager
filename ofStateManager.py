@@ -46,7 +46,7 @@ logger.debug('Metadata filename: ' + metadata_filename)
 #Main function
 logger.info('Start processing.')
 if args.func(args,metadata_filename) is not 0:
-	logger.error('An error occurred! Aborting...')
+	logger.critical('An error occurred! Aborting execution.')
 else:
 	logger.info('Successfully finished processing!')
 
