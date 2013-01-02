@@ -20,12 +20,18 @@ def validate_git_repo(strict=True):
 	if (subprocess.call(['git','rev-parse']) == 0) and (subprocess.call('git clean -xnd `pwd` | grep "Would remove \./" > /dev/null',shell=True) == 1):
 	# we are in a git repository, but not in an ignored directory inside a git repo (i.e. in OF/addons/someAddon)
 		logger.debug('Yes, this is in a git repository.')
+		# check for uncommitted modifications
 		if subprocess.call(['git','diff','--quiet','HEAD']) != 0:
 			logger.error('Repository has uncommitted changes, commit those before continuing!')
 			return 1
 		else:
-			logger.debug('Repository clean')
-			return 0
+			# Check for untracked files
+			if not subprocess.call('git ls-files --others --exclude-standard --error-unmatch . > /dev/null 2>&1',shell=True):
+				logger.error('Repository has untracked files, either commit, ignore or delete them.')
+				return 1
+			else:
+				logger.debug('Repository clean')
+				return 0
 	else:
 		if strict is True:
 			logger.error('Not in a git repository: ' + os.getcwd())
@@ -97,7 +103,7 @@ def record(args, filename):
 			logger.error('Did not find OF location in config.make in ' + os.getcwd())
 			return 1
 	
-	logger.info('Processing OF')
+	logger.info('Processing OF at '+OF_path)
 	os.chdir(OF_path)
 	core_dict={'path': OF_path}
 	if validate_git_repo() !=0:
@@ -417,7 +423,7 @@ def main():
 	list_parser.set_defaults(func=list)
 	
 	args=parser.parse_args()
-#	args=parser.parse_args('list -n bla'.split()) #pass '-xyzZ'.split() for debugging
+#	args=parser.parse_args('record -v'.split()) #pass '-xyzZ'.split() for debugging
 	
 	# Manual defaults for name, to enable correct parsing in list()
 	if not args.name:
