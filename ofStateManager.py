@@ -331,8 +331,28 @@ def checkout(args, filename):
 	return 0
 
 ###############################################################################
+class LessThanLevelFilter(logging.Filter):
+	def __init__(self, passlevel):
+		self.passlevel = passlevel
+	def filter(self, record):
+		return (record.levelno < self.passlevel)
+
 ###############################################################################
 def main():
+	
+	# Set up logging
+	my_format = "%(levelname)s\t%(message)s"
+	#Warning and above goes to stderr
+	eh = logging.StreamHandler(sys.stderr)
+	eh.setFormatter(logging.Formatter(my_format))
+	eh.setLevel(logging.WARNING)
+	# everything from Debug to Info goes to stdout
+	sh = logging.StreamHandler(sys.stdout)
+	sh.setFormatter(logging.Formatter(my_format))
+	sh.setLevel(logging.DEBUG)
+	sh.addFilter(LessThanLevelFilter(logging.WARNING))
+	logger.addHandler(eh)
+	logger.addHandler(sh)
 	
 	#*************************************
 	# command line argument parser
@@ -362,9 +382,13 @@ def main():
 	
 	# Initialisation
 	if args.verbose is True:
-		logging.basicConfig(level=logging.DEBUG)
+		logger.setLevel(logging.DEBUG)
+		# more detailed error messages for verbose mode
+		my_format = "%(levelname)s\t%(funcName)s: %(message)s"
+		sh.setFormatter(logging.Formatter(my_format))
+		eh.setFormatter(logging.Formatter(my_format))
 	else:
-		logging.basicConfig(level=logging.INFO) # DEBUG/INFO/WARNING/ERROR/CRITICAL
+		logger.setLevel(logging.INFO) # DEBUG/INFO/WARNING/ERROR/CRITICAL
 	
 	logger.debug(args)
 	metadata_filename='metadata.json' # file where metadata about project resides
