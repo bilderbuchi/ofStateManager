@@ -146,7 +146,7 @@ def record(args, filename):
 		else:
 			logger.error(addon['name'] + ' git repo could not be validated successfully.')
 			return 1
-	
+
 	logger.info('Storing metadata')
 	os.chdir(projectpath)
 	
@@ -175,7 +175,7 @@ def record(args, filename):
 			json_object['snapshots'].remove(entry)
 	
 	# write updated entry
-	temp= {'name': args.name, 'date': datetime.now().isoformat(), 'core': core_dict, 'addons': addons_list}
+	temp= {'name': args.name, 'date': datetime.now().isoformat(), 'description': args.description, 'core': core_dict, 'addons': addons_list}
 	json_object['snapshots'].append(temp)
 	
 	logger.info('Writing updated data to ' + filename)
@@ -192,7 +192,7 @@ def archive(args, filename):
 	logger.debug('In subcommand archive.')
 	basedir=os.getcwd()
 	os.chdir(args.project)
-	projectpath=os.getcwd()	
+	projectpath=os.getcwd()
 	
 	logger.debug('Opening metadata file')
 	try:
@@ -205,6 +205,7 @@ def archive(args, filename):
 		if e.errno == errno.ENOENT:
 			logger.info('Metadata file ' + filename + ' does not yet exist. Creating...')
 			os.chdir(basedir)
+			setattr(args, 'description', '')
 			if record(args) == 0:
 				os.chdir(basedir)
 				return archive(args) # call archive recursively
@@ -219,6 +220,7 @@ def archive(args, filename):
 	if not entry:
 		logger.info('Entry ' + args.name + ' does not exist yet. Creating...')
 		os.chdir(basedir)
+		setattr(args, 'description', '')
 		if record(args,filename) == 0: # call record to create the necessary entry
 			os.chdir(basedir)
 			return archive(args,filename) # call archive recursively
@@ -229,7 +231,8 @@ def archive(args, filename):
 	else:
 		# entry exists, start archiving
 		# create subdirectory for archive
-		archivedirectory=os.path.basename(projectpath)+'_archive'
+		basename=str(os.path.basename(projectpath))
+		archivedirectory=basename+'_archive'
 		try:
 			os.mkdir(archivedirectory)
 		except OSError as e:
@@ -241,15 +244,21 @@ def archive(args, filename):
 		os.chdir(archivedirectory)
 		
 		# archive all elements
+		# Description file
+		if entry['description'] != '':
+			logger.info('Writing description file')
+			with open(basename+'_'+entry['name']+'_description.txt','w') as descriptionfile:
+				descriptionfile.write(entry['description'])
+			
 		# OF itself
-		archivename=str(os.path.basename(projectpath))+'_'+entry['name']+'_OF_'+entry['core']['sha'][0:7]+'.tar.gz'
+		archivename=basename+'_'+entry['name']+'_OF_'+entry['core']['sha'][0:7]+'.tar.gz'
 		repopath=os.path.abspath(os.path.join(projectpath,entry['core']['path']))
 		git_archive_repo(archivename, os.getcwd(), repopath, entry['core']['sha'])
 		
 		# addons
 		for addon in entry['addons']:
 			logger.info('Archiving addon '+addon['name'])
-			archivename=str(os.path.basename(projectpath))+'_'+entry['name']+'_'+os.path.basename(addon['name'])+'_'+addon['sha'][0:7]+'.tar.gz'
+			archivename=basename+'_'+entry['name']+'_'+os.path.basename(addon['name'])+'_'+addon['sha'][0:7]+'.tar.gz'
 			repopath=os.path.abspath(os.path.join(projectpath,entry['core']['path'],'addons',addon['name']))
 			if addon['sha'] != 'non-git':
 				git_archive_repo(archivename, os.getcwd(), repopath, addon['sha'])
@@ -355,10 +364,12 @@ def list(args, filename):
 	if args.name_was_given:
 		entry = check_for_snapshot_entry(args.name,json_object)
 		if not entry:
-			logger.error('Snapshot entry '+args.name+' does not exist.')
+			logger.error('Snapshot entry '+entry['name']+' does not exist.')
 			return 1
 		else:
-			logger.info('Detailed info for snapshot '+args.name+':')
+			logger.info('Detailed info for snapshot '+entry['name']+':')
+			if entry['description'] != '':
+				logger.info('Description: '+ entry['description'])
 			logger.info('Date: '+entry['date'])
 			logger.info('Openframeworks:')
 			logger.info('  path: '+entry['core']['path'])
@@ -371,7 +382,10 @@ def list(args, filename):
 	else:
 		logger.info('Available snapshots:')
 		for s in json_object['snapshots']:
-			logger.info('  '+s['name'])
+			temp_string='  '+s['name']
+			if s['description'] != '':
+				temp_string+=(': '+s['description'])
+			logger.info(temp_string)
 		logger.info('Get more information by specifying desired snapshot with -n <name>.')
 		return 0
 
@@ -411,6 +425,7 @@ def main():
 	subparsers = parser.add_subparsers(help='Available commands')
 	record_parser = subparsers.add_parser('record', help='Record the state of all relevant components into a snapshot', parents=[parent_parser])
 	record_parser.add_argument('-u', '--update', action='store_true', help='If name already exists, overwrite existing entry')
+	record_parser.add_argument('-d', '--description', default='', help='Short message describing the snapshot in more detail than the name. Do not forget " " around DESCRIPTION if it contains whitespace.')
 	record_parser.set_defaults(func=record)
 	
 	checkout_parser = subparsers.add_parser('checkout', help='Check out the complete named or latest snapshot of your project and OF', parents=[parent_parser])
@@ -423,7 +438,7 @@ def main():
 	list_parser.set_defaults(func=list)
 	
 	args=parser.parse_args()
-#	args=parser.parse_args('record -v'.split()) #pass '-xyzZ'.split() for debugging
+#	args=parser.parse_args('archive -p tests/mockTree/mockProject1 -n somesnaptohs -v'.split()) #pass '-xyzZ'.split() for debugging
 	
 	# Manual defaults for name, to enable correct parsing in list()
 	if not args.name:

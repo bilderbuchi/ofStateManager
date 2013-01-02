@@ -67,7 +67,11 @@ This script relies on an up-to-date `addons.make` file, so if you include addons
 		                    except when using list.
 	  -v, --verbose         Switch on debug logging.
 	  -u, --update          If name already exists, overwrite existing entry
-
+	  -d DESCRIPTION, --description DESCRIPTION
+		                    Short message describing the snapshot in more detail
+		                    than the name. Do not forget " " around DESCRIPTION if
+		                    it contains whitespace.
+	  
 
 	usage: ofStateManager.py checkout [-h] [-p PROJECT] [-n NAME] [-v]
 
