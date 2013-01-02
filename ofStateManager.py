@@ -331,6 +331,45 @@ def checkout(args, filename):
 	return 0
 
 ###############################################################################
+def list(args, filename):
+	"""List available snapshots. If a snapshot name is supplied, give more detailed info.
+	
+	Return 0 on success, 1 on failure."""
+	
+	logger.debug('In subcommand list.')
+	basedir=os.getcwd()
+	os.chdir(args.project)
+	projectpath=os.getcwd()
+	
+	with open(filename,'r') as metafile:
+		json_object = json.load(metafile)
+		logger.info('Loaded json data from ' + filename)
+		logger.debug(json_object)
+	
+	if args.name_was_given:
+		entry = check_for_snapshot_entry(args.name,json_object)
+		if not entry:
+			logger.error('Snapshot entry '+args.name+' does not exist.')
+			return 1
+		else:
+			logger.info('Detailed info for snapshot '+args.name+':')
+			logger.info('Date: '+entry['date'])
+			logger.info('Openframeworks:')
+			logger.info('  path: '+entry['core']['path'])
+			logger.info('  SHA: '+entry['core']['sha'])
+			logger.info('Addons:')
+			for addon in entry['addons']:
+				logger.info('  name: '+addon['name'])
+				logger.info('  SHA: '+addon['sha'])
+			return 0
+	else:
+		logger.info('Available snapshots:')
+		for s in json_object['snapshots']:
+			logger.info('  '+s['name'])
+		logger.info('Get more information by specifying desired snapshot with -n <name>.')
+		return 0
+
+###############################################################################
 class LessThanLevelFilter(logging.Filter):
 	def __init__(self, passlevel):
 		self.passlevel = passlevel
@@ -360,22 +399,32 @@ def main():
 	#Parent parser contains common options
 	parent_parser = argparse.ArgumentParser(add_help=False)
 	parent_parser.add_argument('-p', '--project', default=os.getcwd(), help='Path to the desired project directory, defaults to the current directory if this option is not given')
-	parent_parser.add_argument('-n', '--name', default='latest', help='Name of the desired state, defaults to "latest" if this option is not given')
+	parent_parser.add_argument('-n', '--name', help='Name of the desired snapshot. Defaults to "latest", except when using list.')
 	parent_parser.add_argument('-v', '--verbose', action='store_true', help='Switch on debug logging.')
 	
 	subparsers = parser.add_subparsers(help='Available commands')
-	record_parser = subparsers.add_parser('record', help='Record the state of all relevant components', parents=[parent_parser])
+	record_parser = subparsers.add_parser('record', help='Record the state of all relevant components into a snapshot', parents=[parent_parser])
 	record_parser.add_argument('-u', '--update', action='store_true', help='If name already exists, overwrite existing entry')
 	record_parser.set_defaults(func=record)
 	
-	checkout_parser = subparsers.add_parser('checkout', help='Check out the complete named or latest state of your project and OF', parents=[parent_parser])
+	checkout_parser = subparsers.add_parser('checkout', help='Check out the complete named or latest snapshot of your project and OF', parents=[parent_parser])
 	checkout_parser.set_defaults(func=checkout)
 	
-	archive_parser = subparsers.add_parser('archive', help='Archive all relevant components for the named or latest state', parents=[parent_parser])
+	archive_parser = subparsers.add_parser('archive', help='Archive all relevant components for the named or latest snapshot', parents=[parent_parser])
 	archive_parser.set_defaults(func=archive)
 	
-	#args=parser.parse_args('checkout -v'.split()) #pass '-xyzZ'.split() for debugging
+	list_parser = subparsers.add_parser('list', help='List available snapshots. -n gives more detailed info about named snapshot', parents=[parent_parser])
+	list_parser.set_defaults(func=list)
+	
 	args=parser.parse_args()
+#	args=parser.parse_args('list -n bla'.split()) #pass '-xyzZ'.split() for debugging
+	
+	# Manual defaults for name, to enable correct parsing in list()
+	if not args.name:
+		setattr(args, 'name', 'latest')
+		setattr(args, 'name_was_given', False)
+	else:
+		setattr(args, 'name_was_given', True)
 	
 	#Verify option/argument validity
 	#TODO: verification routines
