@@ -6,12 +6,12 @@ Don't use on production systems or where losing data may be a problem.
 
 ##Description
 This script helps you organize and archive your openFrameworks projects.
-The subcommands `record`, `achive` and `restore` are used for these purposes in conjunction with a metadata file in your project directory.
+The subcommands `record`, `achive`, `restore` and `list` are used for these purposes in conjunction with a metadata file in your project directory.
 
 The metadata.json file is structured so that other information (e.g. dependencies) can easily be added in the future.
 
 ### ofStateManager.py record
-This command records a snapshot of the state (i.e. commit ID) of every involved component (your project, OF itself, any used non-core addons) into a metadata.json file in the project directory.
+This command records a snapshot of the state (i.e. commit ID) of every external component associated with your project (that is openFrameworks itself any used non-core addons) into a metadata.json file in the project directory.
 
 ### ofStateManager.py checkout
 This command restores all relevant components back to a given snapshot state.
@@ -27,6 +27,10 @@ Components under git control are archived as a snapshot (i.e. without git repo o
 OpenFrameworks as a compressed archive comes in at about 220MB.
 
 Please note that the folder structure of your project in relation to OF and addons is not preserved, so when starting work from an archived snapshot, you have to unpack all components to their respective places, which can be deduced from the information in metadata.json.
+
+### ofStateManager.py archive
+This command shows a list of all available snapshots in a project.
+If a name is supplied with `-n/--name`, more detailed info about that snapshot is shown.
 
 ##Usage
 
@@ -59,10 +63,11 @@ This script relies on an up-to-date `addons.make` file, so if you include addons
 	  -p PROJECT, --project PROJECT
 		                    Path to the desired project directory, defaults to the
 		                    current directory if this option is not given
-	  -n NAME, --name NAME  Name of the desired state, defaults to "latest" if
-		                    this option is not given
+	  -n NAME, --name NAME  Name of the desired snapshot. Defaults to "latest",
+		                    except when using list.
 	  -v, --verbose         Switch on debug logging.
 	  -u, --update          If name already exists, overwrite existing entry
+
 
 	usage: ofStateManager.py checkout [-h] [-p PROJECT] [-n NAME] [-v]
 
@@ -71,8 +76,8 @@ This script relies on an up-to-date `addons.make` file, so if you include addons
 	  -p PROJECT, --project PROJECT
 		                    Path to the desired project directory, defaults to the
 		                    current directory if this option is not given
-	  -n NAME, --name NAME  Name of the desired state, defaults to "latest" if
-		                    this option is not given
+	  -n NAME, --name NAME  Name of the desired snapshot. Defaults to "latest",
+		                    except when using list.
 	  -v, --verbose         Switch on debug logging.
 
 
@@ -83,10 +88,21 @@ This script relies on an up-to-date `addons.make` file, so if you include addons
 	  -p PROJECT, --project PROJECT
 		                    Path to the desired project directory, defaults to the
 		                    current directory if this option is not given
-	  -n NAME, --name NAME  Name of the desired state, defaults to "latest" if
-		                    this option is not given
+	  -n NAME, --name NAME  Name of the desired snapshot. Defaults to "latest",
+		                    except when using list.
 	  -v, --verbose         Switch on debug logging.
 
+
+	usage: ofStateManager.py list [-h] [-p PROJECT] [-n NAME] [-v]
+
+	optional arguments:
+	  -h, --help            show this help message and exit
+	  -p PROJECT, --project PROJECT
+		                    Path to the desired project directory, defaults to the
+		                    current directory if this option is not given
+	  -n NAME, --name NAME  Name of the desired snapshot. Defaults to "latest",
+		                    except when using list.
+	  -v, --verbose         Switch on debug logging.
 
 
 ### Examples
