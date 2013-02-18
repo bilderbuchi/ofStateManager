@@ -30,14 +30,38 @@ from utility_functions import *
 def test_record():
 	ret = script_cmd(script_loc + ' record -p mockProject', os.getcwd())
 	assert ret == 0
-	std = load_json_file(os.path.join(replay_dir,'metadata_record.json'))
+	std = load_json_file(os.path.join(replay_dir,'md_record.json'))
+	test = load_json_file(os.path.join('mockProject','metadata.json'))
+	assert test == std
+	
+def test_record_remotedir():
+	currentdir = os.getcwd()
+	os.chdir(os.path.dirname(script_loc))
+	ret = script_cmd(os.path.join('./', os.path.basename(script_loc)) +
+						' record -p ' +	os.path.join(currentdir, 'mockProject'),
+					os.getcwd())
+	assert ret == 0
+	std = load_json_file(os.path.join(replay_dir,'md_record.json'))
+	test = load_json_file(os.path.join(currentdir, 'mockProject', 'metadata.json'))
+	assert test == std
+
+def test_record_named(capfd):
+	ret = script_cmd(script_loc + ' record -p mockProject -n snapshot-1', os.getcwd())
+	assert ret == 0
+	out, err = capfd.readouterr()
+	assert 'DEBUG' not in out
+	assert 'DEBUG' not in err
+	std = load_json_file(os.path.join(replay_dir,'md_record_snapshot-1.json'))
 	test = load_json_file(os.path.join('mockProject','metadata.json'))
 	assert test == std
 
-def test_record_named():
-	ret = script_cmd(script_loc + ' record -p mockProject -n snapshot-1', os.getcwd())
+def test_record_verbosity(capfd):
+	ret = script_cmd(script_loc + ' record -v -p mockProject -n snapshot-1', os.getcwd())
 	assert ret == 0
-	std = load_json_file(os.path.join(replay_dir,'metadata_record_snapshot-1.json'))
+	out, err = capfd.readouterr()
+	assert 'DEBUG' in out
+
+	std = load_json_file(os.path.join(replay_dir,'md_record_snapshot-1.json'))
 	test = load_json_file(os.path.join('mockProject','metadata.json'))
 	assert test == std
 
@@ -50,7 +74,7 @@ def test_record_wrong_project(capfd):
 
 def test_record_update():
 	# copy snapshot-1 metadata file over to mockProject
-	shutil.copyfile(os.path.join(replay_dir, 'metadata_record_snapshot-1.json'),
+	shutil.copyfile(os.path.join(replay_dir, 'md_record_snapshot-1.json'),
 					os.path.join('mockProject', 'metadata.json'))
 	# this has to bail because -u was not given
 	ret = script_cmd(script_loc + ' record -p mockProject -n snapshot-1', os.getcwd())
@@ -59,10 +83,17 @@ def test_record_update():
 	ret = script_cmd(script_loc + ' record -u -p mockProject -n snapshot-1', os.getcwd())
 	assert ret == 0
 
-	std = load_json_file(os.path.join(replay_dir,'metadata_record_snapshot-1.json'))
+	std = load_json_file(os.path.join(replay_dir,'md_record_snapshot-1.json'))
 	test = load_json_file(os.path.join('mockProject','metadata.json'))
 	assert test == std
 
+def test_record_description():
+	ret = script_cmd(script_loc + ' record -p mockProject -d "My Test description"', os.getcwd())
+	assert ret == 0
+	std = load_json_file(os.path.join(replay_dir,'md_record_description.json'))
+	test = load_json_file(os.path.join('mockProject','metadata.json'))
+	assert test == std
+	
 #class TestHelp:
 #	"""Test if help text gets printed"""
 #@pytest.mark.usefixtures('set_up')
@@ -72,3 +103,7 @@ def test_help(capfd):
 	out, err = capfd.readouterr()
 	assert out.startswith('usage: ofStateManager.py [-h]')
 	assert err == ''
+
+
+# TODO: list does not check for description existence!
+# TODO: record with non-existing files just hangs
