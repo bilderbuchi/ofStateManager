@@ -1,0 +1,31 @@
+{
+ "snapshots": [
+  {
+   "addons": [
+    {
+     "name": "ofxSomeAddon", 
+     "sha": "b64dbe3392dbecb8f24fd40c00b5e4e9d1f73b4c"
+    }, 
+    {
+     "name": "../../mockOF/addons/ofxSomeOtherAddon", 
+     "sha": "26f0955dc38ad9388fe167e6717dcd88ea123616"
+    }, 
+    {
+     "name": "../../ofxMockExternalAddon", 
+     "sha": "7a14b5a1b5051c23a3abaff13dd186804daeccda"
+    }, 
+    {
+     "name": "ofxNonGitAddon", 
+     "sha": "non-git"
+    }
+   ], 
+   "core": {
+    "path": "../mockOF", 
+    "sha": "f383ac9737c5efebe02bb3f30810e7b0b205cd7a"
+   }, 
+   "date": "2013-02-18T14:53:18.777887", 
+   "description": "", 
+   "name": "latest"
+  }
+ ]
+}
