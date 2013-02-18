@@ -466,13 +466,15 @@ def main():
 	
 	#Main function
 	logger.info('Start processing.')
-	if args.func(args,metadata_filename) is not 0:
+	ret = args.func(args,metadata_filename)
+	if  ret != 0:
 		logger.critical('An error occurred! Aborting execution.')
 	else:
 		logger.info('Successfully finished processing!')
 	
 	#Cleanup
 	logging.shutdown()
+	return ret
 
 ###############################################################################
 if __name__ == '__main__':
