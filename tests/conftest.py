@@ -5,7 +5,7 @@ import tarfile
 
 basedir = os.path.dirname(__file__)
 
-@pytest.fixture()
+@pytest.fixture(autouse=True)
 def set_up(tmpdir):
 #	print basedir
 	tmpdir.chdir()
