@@ -1,6 +1,6 @@
 """Tests for the help subcommand"""
 import os
-from util_functions import script_loc, script_cmd
+from util_functions import SCRIPT_LOC, script_cmd
 
 
 #class TestHelp:
@@ -8,7 +8,7 @@ from util_functions import script_loc, script_cmd
 #@pytest.mark.usefixtures('set_up')
 def test_help(capfd):
 	"""Test if help text gets printed"""
-	script_cmd(script_loc + ' --help', os.getcwd())
+	script_cmd(SCRIPT_LOC + ' --help', os.getcwd())
 	out, err = capfd.readouterr()
 	assert out.startswith('usage: ofStateManager.py [-h]')
 	assert err == ''

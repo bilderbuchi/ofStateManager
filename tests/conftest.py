@@ -1,15 +1,16 @@
+# pylint: disable=C0111
 import pytest
-import tempfile
 import os
 import tarfile
 
-basedir = os.path.dirname(__file__)
+BASEDIR = os.path.dirname(__file__)
+
 
 @pytest.fixture(autouse=True)
 def set_up(tmpdir):
-#	print basedir
+#	print BASEDIR
 	tmpdir.chdir()
-	tar = tarfile.open(os.path.join(basedir, "MockRepos.tar.gz"))
+	tar = tarfile.open(os.path.join(BASEDIR, "MockRepos.tar.gz"))
 	tar.extractall()
 	tar.close()
 	os.chdir('MockRepos')
