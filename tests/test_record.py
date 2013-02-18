@@ -1,11 +1,8 @@
-
-import os
+"""Tests for the record subcommand"""
 import pytest
-import subprocess
-import shlex
+import os
 import shutil
-import json
-from utility_functions import *
+from util_functions import script_loc, replay_dir, script_cmd, load_json_file
 
 ###############################################################################
 
@@ -94,15 +91,7 @@ def test_record_description():
 	test = load_json_file(os.path.join('mockProject','metadata.json'))
 	assert test == std
 	
-#class TestHelp:
-#	"""Test if help text gets printed"""
-#@pytest.mark.usefixtures('set_up')
-def test_help(capfd):
-	"""Test if help text gets printed"""
-	script_cmd(script_loc + ' --help', os.getcwd())
-	out, err = capfd.readouterr()
-	assert out.startswith('usage: ofStateManager.py [-h]')
-	assert err == ''
+
 
 
 # TODO: list does not check for description existence!
