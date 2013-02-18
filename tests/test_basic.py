@@ -50,3 +50,14 @@ class TestRecord:
 		std = load_json_file(os.path.join(replay_dir,'metadata_record_snapshot-1.json'))
 		test = load_json_file(os.path.join('mockProject','metadata.json'))
 		assert test == std
+
+
+#class TestHelp:
+#	"""Test if help text gets printed"""
+@pytest.mark.usefixtures('set_up')
+def test_help(capfd):
+	"""Test if help text gets printed"""
+	script_cmd(script_loc + ' --help', os.getcwd())
+	out, err = capfd.readouterr()
+	assert out.startswith('usage: ofStateManager.py [-h]')
+	assert err == ''
