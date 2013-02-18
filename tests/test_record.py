@@ -48,6 +48,17 @@ def test_record_remotedir():
 	assert test == std
 
 
+def test_record_default_p_dir():
+	currentdir = os.getcwd()
+	os.chdir('mockProject')
+	ret = script_cmd(SCRIPT_LOC + ' record', os.getcwd())
+	assert ret == 0
+	std = load_json_file(os.path.join(REPLAY_DIR, 'md_record.json'))
+	test = load_json_file(os.path.join(currentdir, 'mockProject',
+									'metadata.json'))
+	assert test == std
+
+
 def test_record_named(capfd):
 	ret = script_cmd(SCRIPT_LOC + ' record -p mockProject -n snapshot-1',
 					os.getcwd())
