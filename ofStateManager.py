@@ -479,4 +479,5 @@ def main():
 ###############################################################################
 if __name__ == '__main__':
 	logger = logging.getLogger('OFStateMgr')
-	main()
+	ret = main()
+	sys.exit(ret)
