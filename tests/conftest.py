@@ -16,3 +16,17 @@ def set_up(tmpdir):
 	os.chdir('MockRepos')
 	print('In directory ' + os.getcwd())
 	# does not need teardown, since tmpdir directories get autodeleted
+
+
+def session_teardown():
+	"""Tear down testing session"""
+	print('Tearing down testing session')
+	os.chdir(BASEDIR)  # so html coverage report lands in correct directory
+
+
+@pytest.fixture(scope='session', autouse=True)
+def session_setup(request):
+	"""Set up testing session"""
+	print('Setting up testing session')
+
+	request.addfinalizer(session_teardown)
