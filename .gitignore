@@ -2,6 +2,7 @@
 *.cache
 *~
 .coverage*
+/tests/htmlcov
 
 addons.make
 config.make
