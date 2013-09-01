@@ -128,6 +128,16 @@ This script relies on an up-to-date `addons.make` file, so if you include addons
 * addons should be under git control, OF must be.
 * any git repos must not have uncommitted changes, otherwise recording the state becomes meaningless.
 
+## Testing
+
+To automatically test ofStateManager, you'll need [py.test](http://pytest.org/) (>=2.3.4).
+Run `py.test` in the project root directory to run the tests.
+
+To also get code coverage information, [coverage.py](http://nedbatchelder.com/code/coverage/) is used.
+
+`coverage command yet to be determined.`
+
+
 ## License
 The code in this repository is available under the MIT License (see license.md).
 
