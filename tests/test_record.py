@@ -133,3 +133,11 @@ class TestRecord:
 		_, err = capfd.readouterr()
 		assert 'ofxSomeAddon does not exist at' in err
 		assert err.endswith('Aborting\n')
+
+	def test_record_addon_invalid(self, capfd):
+		open(os.path.join(os.getcwd(), 'mockOF', 'addons', 'ofxSomeAddon',
+						'untracked.txt'), 'w').close()
+		ret = script_cmd(SCRIPT_LOC + ' record -p mockProject', os.getcwd())
+		assert ret == 1
+		_, err = capfd.readouterr()
+		assert 'Repository has untracked files' in err
