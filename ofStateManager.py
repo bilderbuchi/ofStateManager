@@ -21,7 +21,8 @@ def validate_git_repo(strict=True):
 	# we are in a git repository, but not in an ignored directory inside a git repo (i.e. in OF/addons/someAddon)
 		logger.debug('Yes, this is in a git repository.')
 		# check for uncommitted modifications
-		if subprocess.call(['git','diff','--quiet','HEAD']) != 0:
+		# apparently --quiet is not 100% reliable. Use --exit-code instead
+		if subprocess.call('git diff --exit-code HEAD > /dev/null', shell=True) != 0:
 			logger.error('Repository has uncommitted changes, commit those before continuing!')
 			return 1
 		else:
