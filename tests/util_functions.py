@@ -13,8 +13,7 @@ REPLAY_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__),
 
 
 def script_cmd(arg_string, working_dir):
-	"""Execute command in repo_dir and log output to LOGGER"""
-		# the argument string has to be split if Shell==False in check_output
+	"""Execute command in working_dir and return output"""
 	output = subprocess.call(shlex.split(arg_string),
 								stderr=subprocess.STDOUT, cwd=working_dir)
 	return output

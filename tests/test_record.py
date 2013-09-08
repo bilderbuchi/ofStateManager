@@ -27,6 +27,7 @@ from util_functions import SCRIPT_LOC, REPLAY_DIR, script_cmd, load_json_file
 @pytest.mark.usefixtures('set_up')
 class TestRecord:
 	"""Test record subcommand functions"""
+
 	def test_record(self):
 		ret = script_cmd(SCRIPT_LOC + ' record -p mockProject', os.getcwd())
 		assert ret == 0
@@ -109,3 +110,26 @@ class TestRecord:
 		std = load_json_file(os.path.join(REPLAY_DIR, 'md_record_description.json'))
 		test = load_json_file(os.path.join('mockProject', 'metadata.json'))
 		assert test == std
+
+	def test_record_empty_addons_make(self, capfd):
+		open(os.path.join(os.getcwd(), 'mockProject', 'addons.make'), 'w').close()
+		ret = script_cmd(SCRIPT_LOC + ' record -p mockProject', os.getcwd())
+		assert ret == 0
+		out, _ = capfd.readouterr()
+		assert 'No addons found.' in out
+
+	def test_record_no_OF_location(self, capfd):
+		open(os.path.join(os.getcwd(), 'mockProject', 'config.make'), 'w').close()
+		#print os.getcwd()
+		ret = script_cmd(SCRIPT_LOC + ' record -p mockProject', os.getcwd())
+		assert ret == 1
+		_, err = capfd.readouterr()
+		assert 'Did not find OF location in config.make in' in err
+
+	def test_record_addon_nonexistent(self, capfd):
+		shutil.rmtree(os.path.join('mockOF', 'addons', 'ofxSomeAddon'))
+		ret = script_cmd(SCRIPT_LOC + ' record -p mockProject', os.getcwd())
+		assert ret == 1
+		_, err = capfd.readouterr()
+		assert 'ofxSomeAddon does not exist at' in err
+		assert err.endswith('Aborting\n')

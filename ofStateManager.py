@@ -133,7 +133,7 @@ def record(args, filename):
 			os.chdir(os.path.join(addons_path,addon['name']))
 		except Exception as e:
 			if e.errno == errno.ENOENT:
-				logger.error(addon['name'] + ' does not exist at ' + addons_path + '. Aborting.')
+				logger.error(addon['name'] + ' does not exist at ' + addons_path + '.')
 				sys.exit('Aborting')
 			else:
 				raise
