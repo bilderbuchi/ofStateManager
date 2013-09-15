@@ -1,8 +1,9 @@
 *.pyc
 *.cache
 *~
-.coverage*
+.coverage.*
 /tests/htmlcov
+MockRepos/
 
 addons.make
 config.make

@@ -130,8 +130,11 @@ This script relies on an up-to-date `addons.make` file, so if you include addons
 
 ## Testing
 
-To automatically test ofStateManager, you'll need [py.test](http://pytest.org/) (>=2.3.4).
-Run `py.test` in the project root directory to run the tests.
+To run automated tests on ofStateManager, you'll need [py.test](http://pytest.org/) (>=2.3.4).
+Run `py.test` in the project's `tests` directory to run the tests. All tests should pass.
+
+To also get coverage information, you need [coverage.py](http://nedbatchelder.com/code/coverage/).
+Run `run_coverage.py` in the `tests` directory. The tests run, and you should end up with a short coverage percentage report on the command line and an annotated html version of the code in `tests/htmlcov`.
 
 ## License
 The code in this repository is available under the MIT License (see license.md).
