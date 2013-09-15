@@ -365,7 +365,7 @@ def list(args, filename):
 	if args.name_was_given:
 		entry = check_for_snapshot_entry(args.name,json_object)
 		if not entry:
-			logger.error('Snapshot entry '+entry['name']+' does not exist.')
+			logger.error('Snapshot entry ' + args.name + ' does not exist.')
 			return 1
 		else:
 			logger.info('Detailed info for snapshot '+entry['name']+':')
