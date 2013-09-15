@@ -207,9 +207,9 @@ def archive(args, filename):
 			logger.info('Metadata file ' + filename + ' does not yet exist. Creating...')
 			os.chdir(basedir)
 			setattr(args, 'description', '')
-			if record(args) == 0:
+			if record(args,filename) == 0:
 				os.chdir(basedir)
-				return archive(args) # call archive recursively
+				return archive(args,filename) # call archive recursively
 			else:
 				logger.error('Creation of snapshot ' + args.name + 'failed.')
 				return 1
