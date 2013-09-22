@@ -8,21 +8,6 @@ from util_functions import SCRIPT_LOC, REPLAY_DIR, script_cmd, load_json_file
 # TODO: record with non-existing files just hangs
 ###############################################################################
 
-## Parameterized test function
-#@pytest.mark.usefixtures('set_up')
-#@pytest.mark.parametrize(("command", "std_file"), [
-#    (SCRIPT_LOC + ' record -p mockProject', 'metadata_record.json'),
-#    (SCRIPT_LOC + ' record -p mockProject -n snapshot-1',
-#		'metadata_record_snapshot-1.json'),
-##    ("6*9", 42),
-#])
-#def test_json_output(command, std_file):
-#	ret = script_cmd(command, os.getcwd())
-#	assert ret == 0
-#	std = load_json_file(os.path.join(REPLAY_DIR,std_file))
-#	test = load_json_file(os.path.join('mockProject','metadata.json'))
-#	assert test == std
-
 
 @pytest.mark.usefixtures('set_up')
 class TestRecord:

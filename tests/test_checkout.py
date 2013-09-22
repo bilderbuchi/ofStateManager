@@ -3,7 +3,7 @@
 import pytest
 import os
 import shutil
-from util_functions import SCRIPT_LOC, REPLAY_DIR, script_cmd, load_json_file
+from util_functions import SCRIPT_LOC, script_cmd
 
 
 @pytest.mark.usefixtures('set_up')

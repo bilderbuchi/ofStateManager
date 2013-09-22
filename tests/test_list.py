@@ -29,7 +29,8 @@ class TestList:
 		assert 'Detailed info for snapshot latest:' in out
 		assert 'path: ../mockOF' in out
 
-		ret = script_cmd(SCRIPT_LOC + ' list -p mockProject -n notexist', os.getcwd())
+		ret = script_cmd(SCRIPT_LOC + ' list -p mockProject -n notexist',
+						os.getcwd())
 		assert ret == 1
 		out, err = capfd.readouterr()
 		assert 'Snapshot entry notexist does not exist.' in err
