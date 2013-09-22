@@ -33,3 +33,37 @@ class TestList:
 		assert ret == 1
 		out, err = capfd.readouterr()
 		assert 'Snapshot entry notexist does not exist.' in err
+
+	def test_list_description_latest(self, capfd):
+		ret = script_cmd(SCRIPT_LOC + ' record -p mockProject -d "some description"',
+						os.getcwd())
+		assert ret == 0
+		_, _ = capfd.readouterr()
+
+		ret = script_cmd(SCRIPT_LOC + ' list -p mockProject', os.getcwd())
+		assert ret == 0
+		out, _ = capfd.readouterr()
+		assert 'latest: some description' in out
+
+	def test_list_description_named(self, capfd):
+		ret = script_cmd(SCRIPT_LOC + ' record -p mockProject -d "a text" -n dummy',
+						os.getcwd())
+		assert ret == 0
+		_, _ = capfd.readouterr()
+
+		ret = script_cmd(SCRIPT_LOC + ' list -p mockProject', os.getcwd())
+		assert ret == 0
+		out, _ = capfd.readouterr()
+		assert 'dummy: a text' in out
+
+	def test_list_description_detailed(self, capfd):
+		ret = script_cmd(SCRIPT_LOC + ' record -p mockProject -d "a text" -n dummy',
+						os.getcwd())
+		assert ret == 0
+		_, _ = capfd.readouterr()
+
+		ret = script_cmd(SCRIPT_LOC + ' list -p mockProject -n dummy', os.getcwd())
+		assert ret == 0
+		out, _ = capfd.readouterr()
+		assert 'Detailed info for snapshot dummy:' in out
+		assert 'Description: a text' in out

@@ -20,6 +20,18 @@ class TestArchive:
 		out, _ = capfd.readouterr()
 		assert 'Metadata file metadata.json does not yet exist. Creating' in out
 
+	def test_archive_skipping(self, capfd):
+		ret = script_cmd(SCRIPT_LOC + ' archive -p mockProject', os.getcwd())
+		assert ret == 0
+		out, _ = capfd.readouterr()
+		assert 'Metadata file metadata.json does not yet exist. Creating' in out
+
+		# Do it again to provoke skipping files
+		ret = script_cmd(SCRIPT_LOC + ' archive -p mockProject', os.getcwd())
+		assert ret == 0
+		out, _ = capfd.readouterr()
+		assert  ' already exists. Skipping ...' in out
+
 	def test_archive_named_snapshot(self, capfd):
 		# First, create a metadata file
 		ret = script_cmd(SCRIPT_LOC + ' record -p mockProject', os.getcwd())
