@@ -1,8 +1,9 @@
-# ofStateManager
+# ofStateManager 0.5
 
-## ATTENTION!
-Watch out, this is alpha-quality software!
-Don't use on production systems or where losing data may be a problem.
+Be aware, this is not-yet-finished, beta-quality software.
+It has been reasonably tested, but not on a wide scale or with the latest version of OF (this is still TODO).
+
+Please feel free to give this a spin and [report problems](https://github.com/bilderbuchi/ofStateManager/issues/) if you find any, but don't use it on production systems or where losing data may be a problem yet.
 
 ##Description
 This script helps you organize and archive your openFrameworks projects.
@@ -50,7 +51,7 @@ It can even deal with addons outside of OF, by supplying the path relative to th
 In `config.make`, ofStateManager only searches for the line `OF_ROOT = ../../..` (or whatever the path to OF from the project is), so just add that line and you're good.
 This system works irrespective of location of your project relative to OF, only the path to OF in `config.make` in the project has to be correct.
 
-Analysing project files of 3+ different IDEs was out of scope for this script, and it is expected that with the currently ongoing rewrite of the makefile system those files will be much more heavily utilised across all OF-supported platforms.
+Analysing project files of 3+ different IDEs is out of scope for this script, and it is expected that with the currently ongoing rewrite of the makefile system those files will be much more heavily utilised across all OF-supported platforms.
 
 #### Note for IDE users (XCode, CodeBlocks, Visual Studio,...)
 This script relies on an up-to-date `addons.make` file, so if you include addons in any other way, e.g. by drag-and-dropping in your IDE of choice, **make sure that the entries in `addons.make` are in sync with the project**, otherwise the script won't see the other addons you use.
