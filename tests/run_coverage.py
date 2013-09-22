@@ -5,7 +5,6 @@ import inspect
 import coverage
 import subprocess
 
-print sys.argv[1:]
 arguments = ''
 if len(sys.argv) > 1:
 	arguments = ' '.join(sys.argv[1:])
