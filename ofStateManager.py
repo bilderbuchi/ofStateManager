@@ -60,7 +60,7 @@ def git_archive_repo(archivename, archivepath, repopath, repo_sha):
 			# cf. http://git.661346.n2.nabble.com/Passing-commit-IDs-to-git-archive-td7359753.html
 			# TODO: error catching
 			os.chdir(archivepath)
-		else:
+		else:  # pragma: no cover
 			raise
 			
 ###############################################################################
@@ -136,7 +136,7 @@ def record(args, filename):
 			if e.errno == errno.ENOENT:
 				logger.error(addon['name'] + ' does not exist at ' + addons_path + '.')
 				sys.exit('Aborting')
-			else:
+			else:  # pragma: no cover
 				raise
 			
 		ret= validate_git_repo(strict=False)
@@ -163,7 +163,7 @@ def record(args, filename):
 			open(filename,'w').close()
 			# create new skeleton json_object
 			json_object=json.loads('{ "snapshots": [] }')
-		else:
+		else:  # pragma: no cover
 			raise
 	
 	# Store/update metadata
@@ -213,7 +213,7 @@ def archive(args, filename):
 			else:
 				logger.error('Creation of snapshot ' + args.name + 'failed.')
 				return 1
-		else:
+		else:  # pragma: no cover
 			raise
 		
 	# check if snapshot entry already exists, if not create it
@@ -239,7 +239,7 @@ def archive(args, filename):
 		except OSError as e:
 			if e.errno == errno.EEXIST:
 				logger.debug('Directory '+archivedirectory+' already exists. Continuing.')
-			else:
+			else:  # pragma: no cover
 				logger.error('Could not create directory: ' + archivedirectory + ': ' + str(e))
 				raise
 		os.chdir(archivedirectory)
@@ -478,7 +478,7 @@ def main():
 	return ret
 
 ###############################################################################
-if __name__ == '__main__':
+if __name__ == '__main__':  # pragma: no branch
 	logger = logging.getLogger('OFStateMgr')
 	ret = main()
 	sys.exit(ret)
