@@ -1,5 +1,5 @@
-"""Script to collect coverage information on ofStateManager"""
 #!/usr/bin/env python
+"""Script to collect coverage information on ofStateManager"""
 
 import os
 import sys
