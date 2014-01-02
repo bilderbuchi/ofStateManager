@@ -327,6 +327,30 @@ def archive(args, filename):
 
 
 ###############################################################################
+def get_branchname(target_sha):
+    """
+    Return branch name if a branch exists in cwd which points to target_sha.
+    Return target_sha otherwise
+    """
+    # Create an eval-able dictionary containing SHAs and associated branchnames
+    d = ('{' +
+         subprocess.check_output(['git',
+                                  'for-each-ref',
+                                  '--sort=authordate',
+                                  '--python',
+                                  '--format=%(objectname): %(refname:short),',
+                                  'refs/heads/']) +
+         '}')
+
+    try:
+        name = eval(d)[target_sha]
+        logger.debug('Found branch ' + name + ' pointing at ' + target_sha)
+    except KeyError as _e:
+        name = target_sha
+    return name
+
+
+###############################################################################
 def checkout(args, filename):
     """Check out snapshot from a json file, as specified by arguments in args.
 
@@ -377,12 +401,13 @@ def checkout(args, filename):
                 os.chdir(addons_path)
 
     logger.info('Checking out openFrameworks')
-    # TODO: check for named refs first to avoid unnecessarily detached heads
     logger.info('Checking out ' + entry['core']['sha'] +
                 ' of ' + entry['core']['path'])
     os.chdir(projectpath)
     os.chdir(entry['core']['path'])
-    if subprocess.call(['git', 'checkout', entry['core']['sha']]) != 0:
+    # check for named refs to avoid unnecessarily detached heads
+    refname = get_branchname(entry['core']['sha'])
+    if subprocess.call(['git', 'checkout', refname]) != 0:
         logger.error('An error occured checking out ' + entry['core']['path'])
         return 1
 
@@ -395,7 +420,9 @@ def checkout(args, filename):
                 logger.info('Checking out ' + addon['sha'] +
                             ' of ' + addon['name'])
                 os.chdir(addon['name'])
-                if subprocess.call(['git', 'checkout', addon['sha']]) != 0:
+                # check for named refs to avoid unnecessarily detached heads
+                refname = get_branchname(addon['sha'])
+                if subprocess.call(['git', 'checkout', refname]) != 0:
                     logger.error('An error occured checking out '
                                  + addon['name'])
                     return 1

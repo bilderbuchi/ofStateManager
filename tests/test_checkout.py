@@ -3,6 +3,7 @@
 import pytest
 import os
 import shutil
+import subprocess
 from util_functions import SCRIPT_LOC, script_cmd
 
 
@@ -93,3 +94,41 @@ class TestCheckout:
         assert 'git repo could not be validated successfully.' not in err
         assert 'Correct code state cannot be guaranteed!' not in err
         assert 'ofxNonGitAddon' not in err
+
+    def test_checkout_head_detached(self, capfd):
+        # Create metadata file
+        ret = script_cmd(SCRIPT_LOC + ' record -p mockProject', os.getcwd())
+        assert ret == 0
+
+        # Check it out again, assert that there's no detached HEAD
+        ret = script_cmd(SCRIPT_LOC + ' checkout -v -p mockProject',
+                        os.getcwd())
+        assert ret == 0
+        out, err = capfd.readouterr()
+        assert "You are in 'detached HEAD' state" not in out
+        assert "You are in 'detached HEAD' state" not in err
+
+    def test_checkout_head_should_be_detached(self, capfd):
+        # detach the head of OF
+        os.chdir('mockOF')
+        ret = subprocess.call(['git', 'checkout', 'HEAD^1'])
+        assert ret == 0
+        os.chdir('..')
+
+        # Create metadata file
+        ret = script_cmd(SCRIPT_LOC + ' record -p mockProject', os.getcwd())
+        assert ret == 0
+
+        # reattach the head of OF
+        os.chdir('mockOF')
+        ret = subprocess.call(['git', 'checkout', 'master'])
+        assert ret == 0
+        _, _ = capfd.readouterr()
+        os.chdir('..')
+
+        # Check it out again, assert that there's a detached HEAD now
+        ret = script_cmd(SCRIPT_LOC + ' checkout -p mockProject',
+                        os.getcwd())
+        assert ret == 0
+        _, err = capfd.readouterr()
+        assert "You are in 'detached HEAD' state" in err
