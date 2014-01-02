@@ -21,7 +21,8 @@ class TestList:
         assert 'Available snapshots:' in out
         assert 'latest' in out
 
-        ret = script_cmd(SCRIPT_LOC + ' list -p mockProject -n latest', os.getcwd())
+        ret = script_cmd(SCRIPT_LOC + ' list -p mockProject -n latest',
+                         os.getcwd())
         assert ret == 0
         out, _ = capfd.readouterr()
         assert 'Loaded json data from' in out
@@ -36,8 +37,9 @@ class TestList:
         assert 'Snapshot entry notexist does not exist.' in err
 
     def test_list_description_latest(self, capfd):
-        ret = script_cmd(SCRIPT_LOC + ' record -p mockProject -d "some description"',
-                        os.getcwd())
+        ret = script_cmd(
+                SCRIPT_LOC + ' record -p mockProject -d "some description"',
+                os.getcwd())
         assert ret == 0
         _, _ = capfd.readouterr()
 
@@ -47,8 +49,9 @@ class TestList:
         assert 'latest: some description' in out
 
     def test_list_description_named(self, capfd):
-        ret = script_cmd(SCRIPT_LOC + ' record -p mockProject -d "a text" -n dummy',
-                        os.getcwd())
+        ret = script_cmd(
+                    SCRIPT_LOC + ' record -p mockProject -d "a text" -n dummy',
+                    os.getcwd())
         assert ret == 0
         _, _ = capfd.readouterr()
 
@@ -58,12 +61,14 @@ class TestList:
         assert 'dummy: a text' in out
 
     def test_list_description_detailed(self, capfd):
-        ret = script_cmd(SCRIPT_LOC + ' record -p mockProject -d "a text" -n dummy',
-                        os.getcwd())
+        ret = script_cmd(
+                    SCRIPT_LOC + ' record -p mockProject -d "a text" -n dummy',
+                    os.getcwd())
         assert ret == 0
         _, _ = capfd.readouterr()
 
-        ret = script_cmd(SCRIPT_LOC + ' list -p mockProject -n dummy', os.getcwd())
+        ret = script_cmd(SCRIPT_LOC + ' list -p mockProject -n dummy',
+                         os.getcwd())
         assert ret == 0
         out, _ = capfd.readouterr()
         assert 'Detailed info for snapshot dummy:' in out

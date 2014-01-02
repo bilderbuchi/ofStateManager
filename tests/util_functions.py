@@ -20,7 +20,7 @@ def script_cmd(arg_string, working_dir):
 
 
 def json_replace_date(json_input):
-    """Replace date values in json by dummies to enable meaningful comparison"""
+    """Replace date values in json by dummy to enable meaningful comparison"""
     for item in json_input['snapshots']:
         if item['date']:
             item['date'] = 'removed_date'

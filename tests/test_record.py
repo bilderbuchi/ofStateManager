@@ -23,9 +23,10 @@ class TestRecord:
     def test_record_remotedir(self):
         currentdir = os.getcwd()
         os.chdir(os.path.dirname(SCRIPT_LOC))
-        ret = script_cmd(os.path.join('./', os.path.basename(SCRIPT_LOC)) +
-                            ' record -p ' + os.path.join(currentdir, 'mockProject'),
-                        os.getcwd())
+        ret = script_cmd(
+            os.path.join('./', os.path.basename(SCRIPT_LOC)) + ' record -p ' +
+            os.path.join(currentdir, 'mockProject'),
+            os.getcwd())
         assert ret == 0
         std = load_json_file(os.path.join(REPLAY_DIR, 'md_record.json'))
         test = load_json_file(os.path.join(currentdir, 'mockProject',
@@ -49,23 +50,26 @@ class TestRecord:
         out, err = capfd.readouterr()
         assert 'DEBUG' not in out
         assert 'DEBUG' not in err
-        std = load_json_file(os.path.join(REPLAY_DIR, 'md_record_snapshot-1.json'))
+        std = load_json_file(os.path.join(REPLAY_DIR,
+                                          'md_record_snapshot-1.json'))
         test = load_json_file(os.path.join('mockProject', 'metadata.json'))
         assert test == std
 
     def test_record_verbosity(self, capfd):
-        ret = script_cmd(SCRIPT_LOC + ' record -v -p mockProject -n snapshot-1',
+        rt = script_cmd(SCRIPT_LOC + ' record -v -p mockProject -n snapshot-1',
                         os.getcwd())
-        assert ret == 0
+        assert rt == 0
         out, _ = capfd.readouterr()
         assert 'DEBUG' in out
 
-        std = load_json_file(os.path.join(REPLAY_DIR, 'md_record_snapshot-1.json'))
+        std = load_json_file(os.path.join(REPLAY_DIR,
+                                          'md_record_snapshot-1.json'))
         test = load_json_file(os.path.join('mockProject', 'metadata.json'))
         assert test == std
 
     def test_record_wrong_project(self, capfd):
-        ret = script_cmd(SCRIPT_LOC + ' record -p mockProjectWRONG', os.getcwd())
+        ret = script_cmd(SCRIPT_LOC + ' record -p mockProjectWRONG',
+                         os.getcwd())
         assert ret == 1
         _, err = capfd.readouterr()
         # Do this because subprocess does not raise its child's exceptions
@@ -76,15 +80,16 @@ class TestRecord:
         shutil.copyfile(os.path.join(REPLAY_DIR, 'md_record_snapshot-1.json'),
                         os.path.join('mockProject', 'metadata.json'))
         # this has to bail because -u was not given
-        ret = script_cmd(SCRIPT_LOC + ' record -p mockProject -n snapshot-1',
+        rt = script_cmd(SCRIPT_LOC + ' record -p mockProject -n snapshot-1',
                         os.getcwd())
-        assert ret == 1
+        assert rt == 1
         # this has to work
-        ret = script_cmd(SCRIPT_LOC + ' record -u -p mockProject -n snapshot-1',
+        rt = script_cmd(SCRIPT_LOC + ' record -u -p mockProject -n snapshot-1',
                         os.getcwd())
-        assert ret == 0
+        assert rt == 0
 
-        std = load_json_file(os.path.join(REPLAY_DIR, 'md_record_snapshot-1.json'))
+        std = load_json_file(os.path.join(REPLAY_DIR,
+                                          'md_record_snapshot-1.json'))
         test = load_json_file(os.path.join('mockProject', 'metadata.json'))
         assert test == std
 
@@ -92,19 +97,24 @@ class TestRecord:
         ret = script_cmd(SCRIPT_LOC + ' record -p mockProject' +
                         ' -d "My Test description"', os.getcwd())
         assert ret == 0
-        std = load_json_file(os.path.join(REPLAY_DIR, 'md_record_description.json'))
+        std = load_json_file(os.path.join(REPLAY_DIR,
+                                          'md_record_description.json'))
         test = load_json_file(os.path.join('mockProject', 'metadata.json'))
         assert test == std
 
     def test_record_empty_addons_make(self, capfd):
-        open(os.path.join(os.getcwd(), 'mockProject', 'addons.make'), 'w').close()
+        fobj = open(os.path.join(os.getcwd(), 'mockProject', 'addons.make'),
+                    'w')
+        fobj.close()
         ret = script_cmd(SCRIPT_LOC + ' record -p mockProject', os.getcwd())
         assert ret == 0
         out, _ = capfd.readouterr()
         assert 'No addons found.' in out
 
     def test_record_no_OF_location(self, capfd):
-        open(os.path.join(os.getcwd(), 'mockProject', 'config.make'), 'w').close()
+        fobj = open(os.path.join(os.getcwd(), 'mockProject', 'config.make'),
+                    'w')
+        fobj.close()
         #print os.getcwd()
         ret = script_cmd(SCRIPT_LOC + ' record -p mockProject', os.getcwd())
         assert ret == 1

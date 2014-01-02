@@ -19,13 +19,15 @@ class TestArchive:
         ret = script_cmd(SCRIPT_LOC + ' archive -p mockProject', os.getcwd())
         assert ret == 0
         out, _ = capfd.readouterr()
-        assert 'Metadata file metadata.json does not yet exist. Creating' in out
+        assert ('Metadata file metadata.json does not yet exist. Creating'
+                in out)
 
     def test_archive_skipping(self, capfd):
         ret = script_cmd(SCRIPT_LOC + ' archive -p mockProject', os.getcwd())
         assert ret == 0
         out, _ = capfd.readouterr()
-        assert 'Metadata file metadata.json does not yet exist. Creating' in out
+        assert ('Metadata file metadata.json does not yet exist. Creating'
+                in out)
 
         # Do it again to provoke skipping files
         ret = script_cmd(SCRIPT_LOC + ' archive -p mockProject', os.getcwd())
@@ -45,13 +47,15 @@ class TestArchive:
                         os.getcwd())
         assert ret == 0
         out, _ = capfd.readouterr()
-        assert 'Metadata file metadata.json does not yet exist. Creating' not in out
+        assert ('Metadata file metadata.json does not yet exist. Creating'
+                not in out)
         assert 'Entry someName does not exist yet. Creating...' in out
 
     def test_archive_description(self, capfd):
         # First, create an entry with a description
-        ret = script_cmd(SCRIPT_LOC + ' record -p mockProject -d "my description"',
-                        os.getcwd())
+        ret = script_cmd(
+                    SCRIPT_LOC + ' record -p mockProject -d "my description"',
+                    os.getcwd())
         assert ret == 0
         out, _ = capfd.readouterr()
         assert 'metadata.json does not exist. Creating' in out
@@ -62,17 +66,20 @@ class TestArchive:
         out, _ = capfd.readouterr()
         assert 'Writing description file' in out
         with open(os.path.join('mockProject', 'mockProject_archive',
-                            'mockProject_latest_description.txt'), 'r') as descr:
+                               'mockProject_latest_description.txt'),
+                  'r') as descr:
             assert descr.readline() == "my description"
 
     def test_archive_directory_exists(self, capfd):
         ret = script_cmd(SCRIPT_LOC + ' archive -p mockProject', os.getcwd())
         assert ret == 0
         out, _ = capfd.readouterr()
-        assert 'Metadata file metadata.json does not yet exist. Creating' in out
+        assert ('Metadata file metadata.json does not yet exist. Creating'
+                in out)
 
         ret = script_cmd(SCRIPT_LOC + ' archive -v -p mockProject -n someName',
                         os.getcwd())
         assert ret == 0
         out, _ = capfd.readouterr()
-        assert 'Directory mockProject_archive already exists. Continuing.' in out
+        assert ('Directory mockProject_archive already exists. Continuing.'
+                in out)

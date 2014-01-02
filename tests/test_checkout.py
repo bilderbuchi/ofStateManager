@@ -69,16 +69,17 @@ class TestCheckout:
                         os.getcwd())
         assert ret == 1
         _, err = capfd.readouterr()
-        assert 'ofxSomeAddon git repo could not be validated successfully.' in err
+        assert ('ofxSomeAddon git repo could not be validated successfully.'
+                in err)
 
     def test_checkout_no_nongit(self, capfd):
         # Remove non-git addon from addons.make
-        with open(os.path.join('mockProject', 'addons.make'), 'r') as addons_make:
-            lines = addons_make.readlines()
-        with open(os.path.join('mockProject', 'addons.make'), 'w') as addons_make:
+        with open(os.path.join('mockProject', 'addons.make'), 'r') as fobj:
+            lines = fobj.readlines()
+        with open(os.path.join('mockProject', 'addons.make'), 'w') as fobj:
             for line in lines:
                 if line.rstrip() != 'ofxNonGitAddon':
-                    addons_make.write(line)
+                    fobj.write(line)
 
         # Create metadata file
         ret = script_cmd(SCRIPT_LOC + ' record -p mockProject', os.getcwd())

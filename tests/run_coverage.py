@@ -4,7 +4,6 @@
 import os
 import sys
 import inspect
-import coverage
 import subprocess
 
 
@@ -21,7 +20,8 @@ def main():
     os.environ['COVERAGE_FILE'] = os.path.join(testdir, '.coverage')
 
     subprocess.call('coverage erase', shell=True, cwd=testdir)
-    subprocess.call('coverage run -m py.test ' + arguments, shell=True, cwd=testdir)
+    subprocess.call('coverage run -m py.test ' + arguments,
+                    shell=True, cwd=testdir)
     del os.environ['COVERAGE_PROCESS_START']
     subprocess.call('coverage combine', shell=True, cwd=testdir)
     subprocess.call('coverage html -d ' + os.path.join(testdir, 'htmlcov') +
