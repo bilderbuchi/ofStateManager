@@ -1,42 +1,55 @@
-# ofStateManager 0.5
-
-Be aware, this is not-yet-finished, beta-quality software.
-It has been reasonably tested, but not on a wide scale or with the latest version of OF (this is still TODO).
-
-Please feel free to give this a spin and [report problems](https://github.com/bilderbuchi/ofStateManager/issues/) if you find any, but don't use it on production systems or where losing data may be a problem yet.
+# ofStateManager 1.0
 
 ##Description
 This script helps you organize and archive your openFrameworks projects.
-The subcommands `record`, `achive`, `restore` and `list` are used for these purposes in conjunction with a metadata file in your project directory.
 
-The metadata.json file is structured so that other information (e.g. dependencies) can easily be added in the future.
+The subcommands `record`, `archive`, `checkout` and `list` are used to track and manage the states of your openFrameworks installation and any used non-official addons.
+For this purpose, a metadata file in your project directory is generated and maintained.
+
+Please feel free to give this a spin and [report problems](https://github.com/bilderbuchi/ofStateManager/issues/) if you find any.
+A suite of automated tests puts the code through its paces, but in-the-field user experiences are still lacking, so be careful.
+
+## Requirements/Dependencies
+* OS: Only Linux is tested, MacOS should work, too. Full cross-platformness is intended.
+* python 2, argparse
+* git
+* A basic shell - grep, |, pwd, tar
+* A correct `config.make` has to be present in your project. An `addons.make` file is optional, but necessary if you use any addons in your project.
+* Addons should be under git control, OF must be.
+* Any git repositories must not have uncommitted changes or untracked files (i.e. `git status` must be clean), otherwise recording the state becomes meaningless.
+
+## Installation
+[Download](https://github.com/bilderbuchi/ofStateManager/releases) ofStateManager, and link to `ofStateManager.py` from somewhere in your `PATH` (e.g. `~/.local/bin/` on Ubuntu) so that your shell can find it, then use it in your projects.
+You can also put just `ofStateManager.py` directly in a directory on your `PATH`.
+
+##Commands
 
 ### ofStateManager.py record
-This command records a snapshot of the state (i.e. commit ID) of every external component associated with your project (that is openFrameworks itself any used non-core addons) into a metadata.json file in the project directory.
+This command records a snapshot of the state (i.e. commit ID) of every *external* component associated with your project (that is openFrameworks itself any used non-core addons) into a metadata.json file in the project directory.
 
 ### ofStateManager.py checkout
-This command restores all relevant components back to a given snapshot state.
+This command restores all relevant external components back to a given snapshot state.
 
-Be aware that when checking out a specific commit (as opposed to a branch) puts your git into a "detached HEAD" state, i.e. your current HEAD will not point to a branch. This is perfectly normal. See the section on detached heads on [this page](http://git-scm.com/docs/git-checkout) for an explanation.
+Be aware that checking out a specific commit (as opposed to a branch) often puts your git into a "detached HEAD" state, i.e. your current HEAD will not point to a branch. This is perfectly normal. See the section on detached heads on [this page](http://git-scm.com/docs/git-checkout) for an explanation.
 You can continue work on the affected repository (this is not your *project's* repository, but either OF itself or an addon) either by checking out another branch (e.g. `git checkout master`), or by starting a new branch from the checked out commit branch (i.e. `git checkout -b foo`)
 
 ### ofStateManager.py archive
 This command archives/collects all relevant external components into a folder in your project.
 
-This yields a self-contained project containing all necessary code, e.g. for backup purposes.
+This yields a **self-contained project** containing all necessary code, e.g. for backup purposes.
 Components under git control are archived as a snapshot (i.e. without git repo or history).
 OpenFrameworks as a compressed archive comes in at about 220MB.
 
-Please note that the folder structure of your project in relation to OF and addons is not preserved, so when starting work from an archived snapshot, you have to unpack all components to their respective places, which can be deduced from the information in metadata.json.
+Please note that the folder structure of your project in relation to OF and addons is not preserved, so when starting work from an archived snapshot, you have to unpack all components to their respective places, which can be easily deduced from the information in metadata.json.
 
-### ofStateManager.py archive
+### ofStateManager.py list
 This command shows a list of all available snapshots in a project.
 If a name is supplied with `-n/--name`, more detailed info about that snapshot is shown.
 
 ##Usage
 
 ### Necessary addons.make and config.make files
-To enable ofStateManager to find the location of OF and the used addons, it needs properly formatted `addons.make` and `config.make` files in the project directory.
+To enable ofStateManager to find the location of OF and the used addons (if any), it needs properly formatted `addons.make` and `config.make` files in the project directory.
 
 However, if you don't have those files, it's easy to make them (or adapt from the sample files in the repo): 
 
@@ -51,10 +64,10 @@ It can even deal with addons outside of OF, by supplying the path relative to th
 In `config.make`, ofStateManager only searches for the line `OF_ROOT = ../../..` (or whatever the path to OF from the project is), so just add that line and you're good.
 This system works irrespective of location of your project relative to OF, only the path to OF in `config.make` in the project has to be correct.
 
-Analysing project files of 3+ different IDEs is out of scope for this script, and it is expected that with the currently ongoing rewrite of the makefile system those files will be much more heavily utilised across all OF-supported platforms.
-
 #### Note for IDE users (XCode, CodeBlocks, Visual Studio,...)
 This script relies on an up-to-date `addons.make` file, so if you include addons in any other way, e.g. by drag-and-dropping in your IDE of choice, **make sure that the entries in `addons.make` are in sync with the project**, otherwise the script won't see the other addons you use.
+
+Analysing project files of 3+ different IDEs is out of scope for this script, and it is expected that with the currently ongoing rewrite of the makefile system those files will be much more heavily utilised across all OF-supported platforms.
 
 ### Command line arguments
 	usage: ofStateManager.py record [-h] [-p PROJECT] [-n NAME] [-v] [-u]
@@ -111,23 +124,22 @@ This script relies on an up-to-date `addons.make` file, so if you include addons
 
 
 ### Examples
+* `ofStatemanager.py record` in your project folder records a snapshot of the current state under the default name `latest`.
+
 * `ofStatemanager.py record -p <project-path>` records a snapshot of the current state of the project in the given directory under the default name `latest`.
-* `ofStatemanager.py archive -p <project-path>` archives all necessary components for the project in an archive folder within. If `metadata.json` or the snapshot name don't exist, they are automatically created first.
+This can be useful if `ofStateManager.py` is not on your `PATH`, and you have to point it at another location where your project resides.
+
+* `ofStatemanager.py archive` archives all necessary components for the project in an archive folder within. If `metadata.json` or the snapshot name don't exist, they are automatically created first.
+
 * `ofStatemanager.py checkout --name myRelease` restores all related components to the state defined in the snapshot myRelease.
 
 * `ofStatemanager.py record -v --project <project-path>` records a snapshot of the project in the given directory, additionally printing debug information.
-* `ofStatemanager.py record --name releaseV1.1` records a snapshot of the current state under the given name and aborts if it already exists.
-* `ofStatemanager.py record -u --name releaseV1.1` as previous, but updates the snapshot if it already exists.
-* `ofStatemanager.py record` in your project folder records a snapshot of the current state under the default name `latest`, but this will only work if you put ofStateManager onto your PATH so that your console can find the binary (or you copy the two .py files in the repository over to your project directory.
 
-## Requirements/Dependencies
-* OS: Only Linux is tested, MacOS should work, too. Full cross-platformness is intended.
-* python, argparse 
-* git
-* basic shell - grep, |, pwd, tar
-* config.make and addons.make files have to be present, they contain the necessary information
-* addons should be under git control, OF must be.
-* any git repos must not have uncommitted changes, otherwise recording the state becomes meaningless.
+* `ofStatemanager.py record --name releaseV1.1` records a snapshot of the current state under the given name and aborts if it already exists.
+
+* `ofStatemanager.py record -u --name releaseV1.1` as previous, but updates the snapshot if it already exists.
+
+
 
 ## Testing
 
@@ -136,8 +148,9 @@ Run `py.test` in the project's `tests` directory to run the tests. All tests sho
 
 To also get coverage information, you need [coverage.py](http://nedbatchelder.com/code/coverage/).
 Run `run_coverage.py` in the `tests` directory. The tests run, and you should end up with a short coverage percentage report on the command line and an annotated html version of the code in `tests/htmlcov`.
+Be aware that `coverage` has to be correctly set up to collect [subprocess information](http://nedbatchelder.com/code/coverage/subprocess.html), first.
 
 ## License
 The code in this repository is available under the MIT License (see license.md).
 
-Copyright (c) 2012- Christoph Buchner
+Copyright (c) 2012 - Christoph Buchner
