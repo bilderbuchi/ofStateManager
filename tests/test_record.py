@@ -136,3 +136,10 @@ class TestRecord:
         assert ret == 1
         _, err = capfd.readouterr()
         assert 'Repository has untracked files' in err
+
+    def test_record_no_addonsmake(self, capfd):
+        os.remove(os.path.join(os.getcwd(), 'mockProject', 'addons.make'))
+        ret = script_cmd(SCRIPT_LOC + ' record -v -p mockProject', os.getcwd())
+        assert ret == 0
+        out, _ = capfd.readouterr()
+        assert 'No addons.make file found.' in out

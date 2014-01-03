@@ -107,13 +107,18 @@ def record(args, filename):
     projectpath = os.getcwd()
 
     # parse addons.make into a list of addons
-    with open('addons.make', 'r') as addons_make:
-        #TODO: use dict from beginning
-        addons_list = []
-        for l in addons_make.readlines():
-            addons_list.append(l.rstrip())
-        if len(addons_list) is 0:
-            logger.info('No addons found.')
+    addons_list = []
+    try:
+        with open('addons.make', 'r') as addons_make:
+            for l in addons_make.readlines():
+                addons_list.append(l.rstrip())
+    except IOError as e:
+        if e.errno == errno.ENOENT:
+            logger.debug('No addons.make file found.')
+        else:  # pragma: no cover
+            raise
+    if len(addons_list) is 0:
+        logger.info('No addons found.')
 
     # search config.make for OF location
     with open('config.make', 'r') as config_make:
