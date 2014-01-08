@@ -16,7 +16,7 @@ def validate_git_repo(strict=True):
     Return 0 on success, 1 on error if not in a git repo,
     2 for warning about not being in a git repo"""
 
-    logger.debug('Checking if in a git repository?')
+    LOGGER.debug('Checking if in a git repository?')
     # python3.3 offers subpocess.DEVNULL for output redirection
     if ((0 == subprocess.call(['git', 'rev-parse'])) and
         (1 == subprocess.call(
@@ -24,12 +24,12 @@ def validate_git_repo(strict=True):
                 shell=True))):
     # we are in a git repository, but not in an ignored directory inside a git
     # repo (i.e. in OF/addons/someAddon)
-        logger.debug('Yes, this is in a git repository.')
+        LOGGER.debug('Yes, this is in a git repository.')
         # check for uncommitted modifications
         # apparently --quiet is not 100% reliable. Use --exit-code instead
         if 0 != subprocess.call('git diff --exit-code HEAD > /dev/null',
                                  shell=True):
-            logger.error('Repository has uncommitted changes, ' +
+            LOGGER.error('Repository has uncommitted changes, ' +
                          'commit those before continuing!')
             return 1
         else:
@@ -38,18 +38,18 @@ def validate_git_repo(strict=True):
                         'git ls-files --others --exclude-standard ' +
                         '--error-unmatch . > /dev/null 2>&1',
                         shell=True):
-                logger.error('Repository has untracked files, ' +
+                LOGGER.error('Repository has untracked files, ' +
                              'either commit, ignore or delete them.')
                 return 1
             else:
-                logger.debug('Repository clean')
+                LOGGER.debug('Repository clean')
                 return 0
     else:
         if strict is True:
-            logger.error('Not in a git repository: ' + os.getcwd())
+            LOGGER.error('Not in a git repository: ' + os.getcwd())
             return 1
         else:
-            logger.warning('Not in a git repository: ' + os.getcwd())
+            LOGGER.warning('Not in a git repository: ' + os.getcwd())
             return 2
 
 
@@ -59,11 +59,11 @@ def git_archive_repo(archivename, archivepath, repopath, repo_sha):
 
     try:
         with open(archivename, 'r') as _archivefile:
-            logger.info(archivename + ' already exists. Skipping ...')
-    except IOError as e:
-        if e.errno == errno.ENOENT:
+            LOGGER.info(archivename + ' already exists. Skipping ...')
+    except IOError as exc:
+        if exc.errno == errno.ENOENT:
             os.chdir(archivepath)
-            logger.info('Archiving ' + archivename)
+            LOGGER.info('Archiving ' + archivename)
             os.chdir(repopath)
             # git archive --format=tar.gz --output=arch.tar.gz \
             # --remote=./openFrameworks/ sha
@@ -90,7 +90,7 @@ def check_for_snapshot_entry(name, json_object):
     return_entry = {}
     for entry in json_object['snapshots']:
         if entry['name'] == name:
-            logger.info('Selecting snapshot ' + name)
+            LOGGER.info('Selecting snapshot ' + name)
             return_entry = entry
             break
     return return_entry
@@ -102,7 +102,7 @@ def record(args, filename):
 
     Return 0 on success, 1 on failure."""
 
-    logger.debug('In subcommand record.')
+    LOGGER.debug('In subcommand record.')
     os.chdir(args.project)
     projectpath = os.getcwd()
 
@@ -110,47 +110,47 @@ def record(args, filename):
     addons_list = []
     try:
         with open('addons.make', 'r') as addons_make:
-            for l in addons_make.readlines():
-                addons_list.append(l.rstrip())
-    except IOError as e:
-        if e.errno == errno.ENOENT:
-            logger.debug('No addons.make file found.')
+            for line in addons_make.readlines():
+                addons_list.append(line.rstrip())
+    except IOError as exc:
+        if exc.errno == errno.ENOENT:
+            LOGGER.debug('No addons.make file found.')
         else:  # pragma: no cover
             raise
     if len(addons_list) is 0:
-        logger.info('No addons found.')
+        LOGGER.info('No addons found.')
 
     # search config.make for OF location
     with open('config.make', 'r') as config_make:
-        OF_path = ''
-        for l in config_make.readlines():
-            if 'OF_ROOT =' in l:
-                OF_path = l.split('=', 1)[-1].strip()
+        of_path = ''
+        for line in config_make.readlines():
+            if 'OF_ROOT =' in line:
+                of_path = line.split('=', 1)[-1].strip()
                 break
-        if len(OF_path) == 0:
-            logger.error('Did not find OF location in config.make in ' +
+        if len(of_path) == 0:
+            LOGGER.error('Did not find OF location in config.make in ' +
                          os.getcwd())
             return 1
 
-    logger.info('Processing OF at ' + OF_path)
-    os.chdir(OF_path)
-    core_dict = {'path': OF_path}
+    LOGGER.info('Processing OF at ' + of_path)
+    os.chdir(of_path)
+    core_dict = {'path': of_path}
     if validate_git_repo() != 0:
-        logger.error('OF git repo could not be validated successfully.')
+        LOGGER.error('OF git repo could not be validated successfully.')
         return 1
 
-    logger.debug('Recording commit SHA')
+    LOGGER.debug('Recording commit SHA')
     out = subprocess.check_output(['git', 'rev-parse', 'HEAD'])
     core_dict['sha'] = out.strip()
-    logger.debug('OF commit SHA: ' + core_dict['sha'])
+    LOGGER.debug('OF commit SHA: ' + core_dict['sha'])
 
-    logger.info('Processing addons')
+    LOGGER.info('Processing addons')
     addons_path = os.path.join(os.getcwd(), 'addons')
     os.chdir(addons_path)
     # get list of official addons
     official_addons = []
-    with open('.gitignore', 'r') as g:
-        for line in g:
+    with open('.gitignore', 'r') as gitignore_file:
+        for line in gitignore_file:
             if line.startswith('!ofx'):
                 official_addons.append(line[1:].strip())
     # prune official addons (which are in the OF repo already)
@@ -163,12 +163,12 @@ def record(args, filename):
                    not in official_addons]
 
     for addon in addons_list:
-        logger.info('Processing addon ' + addon['name'])
+        LOGGER.info('Processing addon ' + addon['name'])
         try:
             os.chdir(os.path.join(addons_path, addon['name']))
-        except Exception as e:
-            if e.errno == errno.ENOENT:
-                logger.error(addon['name'] + ' does not exist at ' +
+        except Exception as exc:
+            if exc.errno == errno.ENOENT:
+                LOGGER.error(addon['name'] + ' does not exist at ' +
                              addons_path + '.')
                 sys.exit('Aborting')
             else:  # pragma: no cover
@@ -181,22 +181,22 @@ def record(args, filename):
         elif ret == 2:
             addon['sha'] = 'non-git'
         else:
-            logger.error(addon['name'] +
+            LOGGER.error(addon['name'] +
                          ' git repo could not be validated successfully.')
             return 1
 
-    logger.info('Storing metadata')
+    LOGGER.info('Storing metadata')
     os.chdir(projectpath)
 
     # Open/initialise metadata file
     try:
         with open(filename, 'r') as metafile:
             json_object = json.load(metafile)
-            logger.info('loaded data from ' + filename)
-            logger.debug(json_object)
-    except IOError as e:
-        if e.errno == errno.ENOENT:
-            logger.info(filename + ' does not exist. Creating..')
+            LOGGER.info('loaded data from ' + filename)
+            LOGGER.debug(json_object)
+    except IOError as exc:
+        if exc.errno == errno.ENOENT:
+            LOGGER.info(filename + ' does not exist. Creating..')
             open(filename, 'w').close()
             # create new skeleton json_object
             json_object = json.loads('{ "snapshots": [] }')
@@ -208,7 +208,7 @@ def record(args, filename):
     for entry in json_object['snapshots']:
         if entry['name'] == args.name:
             if (args.update is False) and (args.name is not 'latest'):
-                logger.error(args.name +
+                LOGGER.error(args.name +
                              ': entry with the same name already exists. ' +
                              'Use -u option to overwrite.')
                 return 1
@@ -222,7 +222,7 @@ def record(args, filename):
             'addons': addons_list}
     json_object['snapshots'].append(temp)
 
-    logger.info('Writing updated data to ' + filename)
+    LOGGER.info('Writing updated data to ' + filename)
     with open(filename, 'w') as metafile:
         json.dump(json_object, metafile, indent=1, sort_keys=True)
 
@@ -234,21 +234,21 @@ def archive(args, filename):
     """Archive a snapshot from a json file, as specified by arguments in args.
 
     Return 0 on success, 1 on failure."""
-    logger.debug('In subcommand archive.')
+    LOGGER.debug('In subcommand archive.')
     basedir = os.getcwd()
     os.chdir(args.project)
     projectpath = os.getcwd()
 
-    logger.debug('Opening metadata file')
+    LOGGER.debug('Opening metadata file')
     try:
         with open(filename, 'r') as metafile:
             json_object = json.load(metafile)
-            logger.info('loaded data from ' + filename)
-            logger.debug(json_object)
+            LOGGER.info('loaded data from ' + filename)
+            LOGGER.debug(json_object)
             # update with data
-    except IOError as e:
-        if e.errno == errno.ENOENT:
-            logger.info('Metadata file ' + filename +
+    except IOError as exc:
+        if exc.errno == errno.ENOENT:
+            LOGGER.info('Metadata file ' + filename +
                         ' does not yet exist. Creating...')
             os.chdir(basedir)
             setattr(args, 'description', '')
@@ -256,7 +256,7 @@ def archive(args, filename):
                 os.chdir(basedir)
                 return archive(args, filename)  # call archive recursively
             else:
-                logger.error('Creation of snapshot ' + args.name + 'failed.')
+                LOGGER.error('Creation of snapshot ' + args.name + 'failed.')
                 return 1
         else:  # pragma: no cover
             raise
@@ -264,7 +264,7 @@ def archive(args, filename):
     # check if snapshot entry already exists, if not create it
     entry = check_for_snapshot_entry(args.name, json_object)
     if not entry:
-        logger.info('Entry ' + args.name + ' does not exist yet. Creating...')
+        LOGGER.info('Entry ' + args.name + ' does not exist yet. Creating...')
         os.chdir(basedir)
         setattr(args, 'description', '')
         # call record to create the necessary entry:
@@ -272,7 +272,7 @@ def archive(args, filename):
             os.chdir(basedir)
             return archive(args, filename)  # call archive recursively
         else:
-            logger.error('Creation of snapshot ' + args.name + 'failed.')
+            LOGGER.error('Creation of snapshot ' + args.name + 'failed.')
             return 1
     #--------------------------------------------------------------------------
     else:
@@ -282,20 +282,20 @@ def archive(args, filename):
         archivedirectory = basename + '_archive'
         try:
             os.mkdir(archivedirectory)
-        except OSError as e:
-            if e.errno == errno.EEXIST:
-                logger.debug('Directory ' + archivedirectory +
+        except OSError as exc:
+            if exc.errno == errno.EEXIST:
+                LOGGER.debug('Directory ' + archivedirectory +
                              ' already exists. Continuing.')
             else:  # pragma: no cover
-                logger.error('Could not create directory: ' +
-                             archivedirectory + ': ' + str(e))
+                LOGGER.error('Could not create directory: ' +
+                             archivedirectory + ': ' + str(exc))
                 raise
         os.chdir(archivedirectory)
 
         # archive all elements
         # Description file
         if entry['description'] != '':
-            logger.info('Writing description file')
+            LOGGER.info('Writing description file')
             with open(basename + '_' + entry['name'] +
                       '_description.txt', 'w') as descriptionfile:
                 descriptionfile.write(entry['description'])
@@ -310,7 +310,7 @@ def archive(args, filename):
 
         # addons
         for addon in entry['addons']:
-            logger.info('Archiving addon ' + addon['name'])
+            LOGGER.info('Archiving addon ' + addon['name'])
             archivename = (basename + '_' + entry['name'] + '_' +
                            os.path.basename(addon['name']) + '_' +
                            addon['sha'][0:7] + '.tar.gz')
@@ -322,7 +322,7 @@ def archive(args, filename):
                 git_archive_repo(archivename, os.getcwd(),
                                  repopath, addon['sha'])
             else:
-                logger.info(addon['name'] +
+                LOGGER.info(addon['name'] +
                             ' is not a git repo. Packing as tar.gz file.')
                 subprocess.call(['tar', '-zcf', archivename,
                                  '--directory=' + os.path.dirname(repopath),
@@ -338,19 +338,20 @@ def get_branchname(target_sha):
     Return target_sha otherwise
     """
     # Create an eval-able dictionary containing SHAs and associated branchnames
-    d = ('{' +
-         subprocess.check_output(['git',
-                                  'for-each-ref',
-                                  '--sort=authordate',
-                                  '--python',
-                                  '--format=%(objectname): %(refname:short),',
-                                  'refs/heads/']) +
-         '}')
+    my_dict = (
+        '{' +
+        subprocess.check_output(['git',
+                                 'for-each-ref',
+                                 '--sort=authordate',
+                                 '--python',
+                                 '--format=%(objectname): %(refname:short),',
+                                 'refs/heads/']) +
+        '}')
 
     try:
-        name = eval(d)[target_sha]
-        logger.debug('Found branch ' + name + ' pointing at ' + target_sha)
-    except KeyError as _e:
+        name = eval(my_dict)[target_sha]
+        LOGGER.debug('Found branch ' + name + ' pointing at ' + target_sha)
+    except KeyError as _exc:
         name = target_sha
     return name
 
@@ -360,7 +361,7 @@ def checkout(args, filename):
     """Check out snapshot from a json file, as specified by arguments in args.
 
     Return 0 on success, 1 on failure."""
-    logger.debug('In subcommand checkout.')
+    LOGGER.debug('In subcommand checkout.')
     os.chdir(args.project)
     projectpath = os.getcwd()
     non_git_repos = []
@@ -369,75 +370,75 @@ def checkout(args, filename):
     try:
         with open(filename, 'r') as metafile:
             json_object = json.load(metafile)
-            logger.info('Loaded json data from ' + filename)
-            logger.debug(json_object)
-    except IOError as e:
-            logger.error('Could not open file: ' + str(e))
+            LOGGER.info('Loaded json data from ' + filename)
+            LOGGER.debug(json_object)
+    except IOError as exc:
+            LOGGER.error('Could not open file: ' + str(exc))
             return 1
 
     entry = check_for_snapshot_entry(args.name, json_object)
     if not entry:
-        logger.error('Snapshot entry ' + args.name + ' does not exist.')
+        LOGGER.error('Snapshot entry ' + args.name + ' does not exist.')
         return 1
 
     # make sure all components have clean repos before actual operations,
     # skip non-git
-    logger.info('Making sure repos are clean: OF')
+    LOGGER.info('Making sure repos are clean: OF')
     os.chdir(entry['core']['path'])
     if validate_git_repo() != 0:
-        logger.error('OF git repo could not be validated successfully.')
+        LOGGER.error('OF git repo could not be validated successfully.')
         return 1
 
-    logger.info('Making sure repos are clean: addons')
+    LOGGER.info('Making sure repos are clean: addons')
     addons_path = os.path.join(os.getcwd(), 'addons')
     os.chdir(addons_path)
     for addon in entry['addons']:
-            logger.info('Processing addon ' + addon['name'])
+            LOGGER.info('Processing addon ' + addon['name'])
             if addon['sha'] == 'non-git':
-                logger.info('Skipping non-git addon ' + addon['name'])
+                LOGGER.info('Skipping non-git addon ' + addon['name'])
                 non_git_repos.append(addon['name'])
             else:
                 os.chdir(addon['name'])
                 if validate_git_repo() != 0:
-                    logger.error(
+                    LOGGER.error(
                         addon['name'] +
                         ' git repo could not be validated successfully.')
                     return 1
                 os.chdir(addons_path)
 
-    logger.info('Checking out openFrameworks')
-    logger.info('Checking out ' + entry['core']['sha'] +
+    LOGGER.info('Checking out openFrameworks')
+    LOGGER.info('Checking out ' + entry['core']['sha'] +
                 ' of ' + entry['core']['path'])
     os.chdir(projectpath)
     os.chdir(entry['core']['path'])
     # check for named refs to avoid unnecessarily detached heads
     refname = get_branchname(entry['core']['sha'])
     if subprocess.call(['git', 'checkout', refname]) != 0:
-        logger.error('An error occured checking out ' + entry['core']['path'])
+        LOGGER.error('An error occured checking out ' + entry['core']['path'])
         return 1
 
-    logger.info('Checking out addons')
+    LOGGER.info('Checking out addons')
     os.chdir(addons_path)
     for addon in entry['addons']:
             if addon['sha'] == 'non-git':
-                logger.info('Skipping non-git addon ' + addon['name'])
+                LOGGER.info('Skipping non-git addon ' + addon['name'])
             else:
-                logger.info('Checking out ' + addon['sha'] +
+                LOGGER.info('Checking out ' + addon['sha'] +
                             ' of ' + addon['name'])
                 os.chdir(addon['name'])
                 # check for named refs to avoid unnecessarily detached heads
                 refname = get_branchname(addon['sha'])
                 if subprocess.call(['git', 'checkout', refname]) != 0:
-                    logger.error('An error occured checking out '
+                    LOGGER.error('An error occured checking out '
                                  + addon['name'])
                     return 1
                 os.chdir(addons_path)
-    logger.info('Finished checking out snapshot ' + entry['name'])
+    LOGGER.info('Finished checking out snapshot ' + entry['name'])
     if non_git_repos:
-        logger.warning('The following addons not under git control were ' +
+        LOGGER.warning('The following addons not under git control were ' +
                        'found. Correct code state cannot be guaranteed!')
         for item in non_git_repos:
-            logger.warning(str(item))
+            LOGGER.warning(str(item))
 
     return 0
 
@@ -449,40 +450,40 @@ def list_command(args, filename):
 
     Return 0 on success, 1 on failure."""
 
-    logger.debug('In subcommand list.')
+    LOGGER.debug('In subcommand list.')
     os.chdir(args.project)
 
     with open(filename, 'r') as metafile:
         json_object = json.load(metafile)
-        logger.info('Loaded json data from ' + filename)
-        logger.debug(json_object)
+        LOGGER.info('Loaded json data from ' + filename)
+        LOGGER.debug(json_object)
 
     if args.name_was_given:
         entry = check_for_snapshot_entry(args.name, json_object)
         if not entry:
-            logger.error('Snapshot entry ' + args.name + ' does not exist.')
+            LOGGER.error('Snapshot entry ' + args.name + ' does not exist.')
             return 1
         else:
-            logger.info('Detailed info for snapshot ' + entry['name'] + ':')
+            LOGGER.info('Detailed info for snapshot ' + entry['name'] + ':')
             if entry['description'] != '':
-                logger.info('Description: ' + entry['description'])
-            logger.info('Date: ' + entry['date'])
-            logger.info('Openframeworks:')
-            logger.info('  path: ' + entry['core']['path'])
-            logger.info('  SHA: ' + entry['core']['sha'])
-            logger.info('Addons:')
+                LOGGER.info('Description: ' + entry['description'])
+            LOGGER.info('Date: ' + entry['date'])
+            LOGGER.info('Openframeworks:')
+            LOGGER.info('  path: ' + entry['core']['path'])
+            LOGGER.info('  SHA: ' + entry['core']['sha'])
+            LOGGER.info('Addons:')
             for addon in entry['addons']:
-                logger.info('  name: ' + addon['name'])
-                logger.info('  SHA: ' + addon['sha'])
+                LOGGER.info('  name: ' + addon['name'])
+                LOGGER.info('  SHA: ' + addon['sha'])
             return 0
     else:
-        logger.info('Available snapshots:')
-        for s in json_object['snapshots']:
-            temp_string = '  ' + s['name']
-            if s['description'] != '':
-                temp_string += (': ' + s['description'])
-            logger.info(temp_string)
-        logger.info('Get more information by specifying desired ' +
+        LOGGER.info('Available snapshots:')
+        for snapshot in json_object['snapshots']:
+            temp_string = '  ' + snapshot['name']
+            if snapshot['description'] != '':
+                temp_string += (': ' + snapshot['description'])
+            LOGGER.info(temp_string)
+        LOGGER.info('Get more information by specifying desired ' +
                     'snapshot with -n <name>.')
         return 0
 
@@ -492,8 +493,8 @@ class LessThanLevelFilter(logging.Filter):
     def __init__(self, passlevel):
         self.passlevel = passlevel
 
-    def filter(self, record):
-        return (record.levelno < self.passlevel)
+    def filter(self, some_record):
+        return (some_record.levelno < self.passlevel)
 
 
 ###############################################################################
@@ -502,16 +503,16 @@ def main():
     # Set up logging
     my_format = "%(levelname)s\t%(message)s"
     #Warning and above goes to stderr
-    eh = logging.StreamHandler(sys.stderr)
-    eh.setFormatter(logging.Formatter(my_format))
-    eh.setLevel(logging.WARNING)
+    stderr_handler = logging.StreamHandler(sys.stderr)
+    stderr_handler.setFormatter(logging.Formatter(my_format))
+    stderr_handler.setLevel(logging.WARNING)
     # everything from Debug to Info goes to stdout
-    sh = logging.StreamHandler(sys.stdout)
-    sh.setFormatter(logging.Formatter(my_format))
-    sh.setLevel(logging.DEBUG)
-    sh.addFilter(LessThanLevelFilter(logging.WARNING))
-    logger.addHandler(eh)
-    logger.addHandler(sh)
+    stdout_handler = logging.StreamHandler(sys.stdout)
+    stdout_handler.setFormatter(logging.Formatter(my_format))
+    stdout_handler.setLevel(logging.DEBUG)
+    stdout_handler.addFilter(LessThanLevelFilter(logging.WARNING))
+    LOGGER.addHandler(stderr_handler)
+    LOGGER.addHandler(stdout_handler)
 
     #*************************************
     # command line argument parser
@@ -593,25 +594,25 @@ def main():
 
     # Initialisation
     if args.verbose is True:
-        logger.setLevel(logging.DEBUG)
+        LOGGER.setLevel(logging.DEBUG)
         # more detailed error messages for verbose mode
         my_format = "%(levelname)s\t%(funcName)s: %(message)s"
-        sh.setFormatter(logging.Formatter(my_format))
-        eh.setFormatter(logging.Formatter(my_format))
+        stdout_handler.setFormatter(logging.Formatter(my_format))
+        stderr_handler.setFormatter(logging.Formatter(my_format))
     else:
-        logger.setLevel(logging.INFO)  # DEBUG/INFO/WARNING/ERROR/CRITICAL
+        LOGGER.setLevel(logging.INFO)  # DEBUG/INFO/WARNING/ERROR/CRITICAL
 
-    logger.debug(args)
+    LOGGER.debug(args)
     metadata_filename = 'metadata.json'  # file with metadata about project
-    logger.debug('Metadata filename: ' + metadata_filename)
+    LOGGER.debug('Metadata filename: ' + metadata_filename)
 
     #Main function
-    logger.info('Start processing.')
+    LOGGER.info('Start processing.')
     ret = args.func(args, metadata_filename)
     if  ret != 0:
-        logger.critical('An error occurred! Aborting execution.')
+        LOGGER.critical('An error occurred! Aborting execution.')
     else:
-        logger.info('Successfully finished processing!')
+        LOGGER.info('Successfully finished processing!')
 
     #Cleanup
     logging.shutdown()
@@ -619,6 +620,6 @@ def main():
 
 ###############################################################################
 if __name__ == '__main__':  # pragma: no branch
-    logger = logging.getLogger('OFStateMgr')
-    ret = main()
-    sys.exit(ret)
+    LOGGER = logging.getLogger('OFStateMgr')
+    RET_VAL = main()
+    sys.exit(RET_VAL)
