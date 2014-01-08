@@ -12,3 +12,8 @@ notes.md
 metadata.json
 /ofStateManager*
 
+#IDE files
+/.settings
+/.project
+/.pydevproject
+
