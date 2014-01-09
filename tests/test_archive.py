@@ -19,14 +19,14 @@ class TestArchive:
         ret = script_cmd(SCRIPT_LOC + ' archive -p mockProject', os.getcwd())
         assert ret == 0
         out, _ = capfd.readouterr()
-        assert ('Metadata file metadata.json does not yet exist. Creating'
+        assert ('Metadata file metadata.json does not exist yet. Creating'
                 in out)
 
     def test_archive_skipping(self, capfd):
         ret = script_cmd(SCRIPT_LOC + ' archive -p mockProject', os.getcwd())
         assert ret == 0
         out, _ = capfd.readouterr()
-        assert ('Metadata file metadata.json does not yet exist. Creating'
+        assert ('Metadata file metadata.json does not exist yet. Creating'
                 in out)
 
         # Do it again to provoke skipping files
@@ -40,14 +40,14 @@ class TestArchive:
         ret = script_cmd(SCRIPT_LOC + ' record -p mockProject', os.getcwd())
         assert ret == 0
         out, _ = capfd.readouterr()
-        assert 'metadata.json does not exist. Creating' in out
+        assert 'metadata.json does not exist yet. Creating' in out
 
         # Now, create a named snapshot
         ret = script_cmd(SCRIPT_LOC + ' archive -p mockProject -n someName',
                         os.getcwd())
         assert ret == 0
         out, _ = capfd.readouterr()
-        assert ('Metadata file metadata.json does not yet exist. Creating'
+        assert ('Metadata file metadata.json does not exist yet. Creating'
                 not in out)
         assert 'Entry someName does not exist yet. Creating...' in out
 
@@ -58,7 +58,7 @@ class TestArchive:
                     os.getcwd())
         assert ret == 0
         out, _ = capfd.readouterr()
-        assert 'metadata.json does not exist. Creating' in out
+        assert 'metadata.json does not exist yet. Creating' in out
 
         # Now, archive the "latest" entry
         ret = script_cmd(SCRIPT_LOC + ' archive -p mockProject', os.getcwd())
@@ -74,7 +74,7 @@ class TestArchive:
         ret = script_cmd(SCRIPT_LOC + ' archive -p mockProject', os.getcwd())
         assert ret == 0
         out, _ = capfd.readouterr()
-        assert ('Metadata file metadata.json does not yet exist. Creating'
+        assert ('Metadata file metadata.json does not exist yet. Creating'
                 in out)
 
         ret = script_cmd(SCRIPT_LOC + ' archive -v -p mockProject -n someName',

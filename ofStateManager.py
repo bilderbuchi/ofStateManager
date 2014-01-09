@@ -196,7 +196,7 @@ def record(args, filename):
             LOGGER.debug(json_object)
     except IOError as exc:
         if exc.errno == errno.ENOENT:
-            LOGGER.info(filename + ' does not exist. Creating..')
+            LOGGER.info(filename + ' does not exist yet. Creating..')
             open(filename, 'w').close()
             # create new skeleton json_object
             json_object = json.loads('{ "snapshots": [] }')
@@ -230,6 +230,20 @@ def record(args, filename):
 
 
 ###############################################################################
+def create_entry_then_archive(args, basedir, filename):
+    """run record, then archive, """
+    os.chdir(basedir)
+    setattr(args, 'description', '')
+    # call record to create the necessary entry:
+    if record(args, filename) == 0:
+        os.chdir(basedir)
+        return archive(args, filename)  # call archive recursively
+    else:
+        LOGGER.error('Creation of snapshot ' + args.name + 'failed.')
+        return 1
+
+
+###############################################################################
 def archive(args, filename):
     """Archive a snapshot from a json file, as specified by arguments in args.
 
@@ -249,15 +263,8 @@ def archive(args, filename):
     except IOError as exc:
         if exc.errno == errno.ENOENT:
             LOGGER.info('Metadata file ' + filename +
-                        ' does not yet exist. Creating...')
-            os.chdir(basedir)
-            setattr(args, 'description', '')
-            if record(args, filename) == 0:
-                os.chdir(basedir)
-                return archive(args, filename)  # call archive recursively
-            else:
-                LOGGER.error('Creation of snapshot ' + args.name + 'failed.')
-                return 1
+                        ' does not exist yet. Creating...')
+            return create_entry_then_archive(args, basedir, filename)
         else:  # pragma: no cover
             raise
 
@@ -265,15 +272,7 @@ def archive(args, filename):
     entry = check_for_snapshot_entry(args.name, json_object)
     if not entry:
         LOGGER.info('Entry ' + args.name + ' does not exist yet. Creating...')
-        os.chdir(basedir)
-        setattr(args, 'description', '')
-        # call record to create the necessary entry:
-        if record(args, filename) == 0:
-            os.chdir(basedir)
-            return archive(args, filename)  # call archive recursively
-        else:
-            LOGGER.error('Creation of snapshot ' + args.name + 'failed.')
-            return 1
+        return create_entry_then_archive(args, basedir, filename)
     #--------------------------------------------------------------------------
     else:
         # entry exists, start archiving
