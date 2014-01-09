@@ -2,7 +2,7 @@
 # pylint: disable=C0111
 import pytest
 import os
-from util_functions import SCRIPT_LOC, script_cmd
+from util_functions import run_ofSM
 
 # TODO: git_archive_repo needs to return exist status to verify packing worked.
 
@@ -16,54 +16,38 @@ class TestArchive:
     """
 
     def test_archive_default(self, capfd):
-        ret = script_cmd(SCRIPT_LOC + ' archive -p mockProject', os.getcwd())
-        assert ret == 0
-        out, _ = capfd.readouterr()
+        out, _ = run_ofSM('archive -p mockProject', capfd=capfd)
         assert ('Metadata file metadata.json does not exist yet. Creating'
                 in out)
 
     def test_archive_skipping(self, capfd):
-        ret = script_cmd(SCRIPT_LOC + ' archive -p mockProject', os.getcwd())
-        assert ret == 0
-        out, _ = capfd.readouterr()
+        out, _ = run_ofSM('archive -p mockProject', capfd=capfd)
         assert ('Metadata file metadata.json does not exist yet. Creating'
                 in out)
 
         # Do it again to provoke skipping files
-        ret = script_cmd(SCRIPT_LOC + ' archive -p mockProject', os.getcwd())
-        assert ret == 0
-        out, _ = capfd.readouterr()
+        out, _ = run_ofSM('archive -p mockProject', capfd=capfd)
         assert  ' already exists. Skipping ...' in out
 
     def test_archive_named_snapshot(self, capfd):
         # First, create a metadata file
-        ret = script_cmd(SCRIPT_LOC + ' record -p mockProject', os.getcwd())
-        assert ret == 0
-        out, _ = capfd.readouterr()
+        out, _ = run_ofSM('record -p mockProject', capfd=capfd)
         assert 'metadata.json does not exist yet. Creating' in out
 
         # Now, create a named snapshot
-        ret = script_cmd(SCRIPT_LOC + ' archive -p mockProject -n someName',
-                        os.getcwd())
-        assert ret == 0
-        out, _ = capfd.readouterr()
+        out, _ = run_ofSM('archive -p mockProject -n someName', capfd=capfd)
         assert ('Metadata file metadata.json does not exist yet. Creating'
                 not in out)
         assert 'Entry someName does not exist yet. Creating...' in out
 
     def test_archive_description(self, capfd):
         # First, create an entry with a description
-        ret = script_cmd(
-                    SCRIPT_LOC + ' record -p mockProject -d "my description"',
-                    os.getcwd())
-        assert ret == 0
-        out, _ = capfd.readouterr()
+        out, _ = run_ofSM('record -p mockProject -d "my description"',
+                          capfd=capfd)
         assert 'metadata.json does not exist yet. Creating' in out
 
         # Now, archive the "latest" entry
-        ret = script_cmd(SCRIPT_LOC + ' archive -p mockProject', os.getcwd())
-        assert ret == 0
-        out, _ = capfd.readouterr()
+        out, _ = run_ofSM('archive -p mockProject', capfd=capfd)
         assert 'Writing description file' in out
         with open(os.path.join('mockProject', 'mockProject_archive',
                                'mockProject_latest_description.txt'),
@@ -71,15 +55,10 @@ class TestArchive:
             assert descr.readline() == "my description"
 
     def test_archive_directory_exists(self, capfd):
-        ret = script_cmd(SCRIPT_LOC + ' archive -p mockProject', os.getcwd())
-        assert ret == 0
-        out, _ = capfd.readouterr()
+        out, _ = run_ofSM('archive -p mockProject', capfd=capfd)
         assert ('Metadata file metadata.json does not exist yet. Creating'
                 in out)
 
-        ret = script_cmd(SCRIPT_LOC + ' archive -v -p mockProject -n someName',
-                        os.getcwd())
-        assert ret == 0
-        out, _ = capfd.readouterr()
+        out, _ = run_ofSM('archive -v -p mockProject -n someName', capfd=capfd)
         assert ('Directory mockProject_archive already exists. Continuing.'
                 in out)

@@ -19,6 +19,20 @@ def script_cmd(arg_string, working_dir):
     return output
 
 
+def run_ofSM(option_string='', capfd=None, desired_exit_status=0):
+    """
+    Run ofStateManager in current directory, perform exit status check.
+
+    Also takes an option string, and can return stdout and stderr if
+    pytest capfd is passed.
+    """
+    exit_status = script_cmd(SCRIPT_LOC + ' ' + option_string, os.getcwd())
+    assert exit_status == desired_exit_status
+    if capfd:
+        out, err = capfd.readouterr()
+        return out, err
+
+
 def json_replace_date(json_input):
     """Replace date values in json by dummy to enable meaningful comparison"""
     for item in json_input['snapshots']:
