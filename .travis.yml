@@ -8,7 +8,9 @@ branches:
     - distribution
 
 # command to install dependencies
-install: "python setup.py install"
+install:
+  - python setup.py install
+  - pip install coverage
 # command to run tests
 script:
   - "python setup.py test"
