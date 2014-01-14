@@ -1,4 +1,4 @@
-# ofStateManager 1.0
+# ofStateManager 1.0 [![Build Status](https://travis-ci.org/bilderbuchi/ofStateManager.png?branch=distribution)](https://travis-ci.org/bilderbuchi/ofStateManager)
 
 ##Description
 This script helps you organize and archive your openFrameworks projects.
