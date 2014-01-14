@@ -1,10 +1,15 @@
 #!/usr/bin/env python
 
+import sys
+# Check for correct Python version
+if (sys.version_info < (2, 7)) or (sys.version_info >= (3, 0)):
+    print("This package needs Python 2.7 to run.")
+    sys.exit(1)
+
 from ez_setup import use_setuptools
 use_setuptools()
 from setuptools import setup
 from setuptools.command.test import test as TestCommand
-import sys
 
 
 # to install: ./setup.py install
@@ -48,6 +53,6 @@ setup(name='ofStateManager',
       url='https://github.com/bilderbuchi/ofStateManager',
       cmdclass={'test': PyTest},
       scripts=['ofStateManager.py'],
-      requires=['argparse'],
+#      requires=['argparse'], # dropped because included in python 2.7
       tests_require=['pytest>=2.3.4', 'coverage'],
      )

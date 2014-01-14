@@ -11,7 +11,7 @@ A suite of automated tests puts the code through its paces, but in-the-field use
 
 ## Requirements/Dependencies
 * OS: Only Linux is tested, MacOS should work, too. Full cross-platformness is intended.
-* Python: Python 2, argparse
+* Python: Python 2.7
 * git
 * A basic shell - grep, |, pwd, tar
 * A correct `config.make` has to be present in your project. An `addons.make` file is optional, but necessary if you use any addons in your project.
