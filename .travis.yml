@@ -12,4 +12,5 @@ install: "python setup.py install"
 # command to run tests
 script:
   - "python setup.py test"
+  - touch echo "import coverage; coverage.process_startup()" > subproc.pth
   - "python tests/run_coverage.py"
