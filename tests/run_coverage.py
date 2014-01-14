@@ -26,8 +26,9 @@ def main():
     subprocess.call('coverage combine', shell=True, cwd=testdir)
     subprocess.call('coverage html -d ' + os.path.join(testdir, 'htmlcov') +
                     ' --include=' + script_path, shell=True, cwd=testdir)
-    subprocess.call('coverage report --include=' + script_path,
-                    shell=True, cwd=testdir)
+    retcode = subprocess.call('coverage report --fail-under=96 --include=' +
+                              script_path, shell=True, cwd=testdir)
+    exit(retcode)
 
 
 if __name__ == '__main__':
