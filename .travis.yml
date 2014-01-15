@@ -15,4 +15,6 @@ install:
 script:
   - py.test
   - touch echo "import coverage; coverage.process_startup()" > subproc.pth
+  - cat subproc.pth
+  - cp subproc.pth $HOME/virtualenv/$TRAVIS_PYTHON_VERSION/lib/$TRAVIS_PYTHON_VERSION/site-packages/
   - "python tests/run_coverage.py"
