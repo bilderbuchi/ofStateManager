@@ -14,5 +14,4 @@ before_script:
 
 # run tests
 script:
-  - py.test
   - python tests/run_coverage.py
