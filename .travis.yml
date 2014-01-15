@@ -10,11 +10,11 @@ branches:
 # command to install dependencies
 install:
   - pip install .
-  - pip install .[test]
+  - pip install -e .[test]
 # command to run tests
 script:
   - py.test
-  - touch echo "import coverage; coverage.process_startup()" > subproc.pth
+  - echo "import coverage; coverage.process_startup()" > subproc.pth
   - cat subproc.pth
-  - cp subproc.pth $HOME/virtualenv/$TRAVIS_PYTHON_VERSION/lib/$TRAVIS_PYTHON_VERSION/site-packages/
+  - cp subproc.pth $HOME/virtualenv/python$TRAVIS_PYTHON_VERSION/lib/python$TRAVIS_PYTHON_VERSION/site-packages/
   - "python tests/run_coverage.py"
