@@ -9,10 +9,10 @@ branches:
 
 # command to install dependencies
 install:
-  - python setup.py install
-  - pip install coverage
+  - pip install .
+  - pip install .[test]
 # command to run tests
 script:
-  - "python setup.py test"
+  - py.test
   - touch echo "import coverage; coverage.process_startup()" > subproc.pth
   - "python tests/run_coverage.py"

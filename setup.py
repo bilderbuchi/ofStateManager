@@ -54,5 +54,6 @@ setup(name='ofStateManager',
       cmdclass={'test': PyTest},
       scripts=['ofStateManager.py'],
 #      requires=['argparse'], # dropped because included in python 2.7
-      tests_require=['pytest>=2.3.4', 'coverage'],
+      extras_require={'test': ['pytest>=2.3.4', 'coverage']}
+#      tests_require=['pytest>=2.3.4', 'coverage'],
      )
