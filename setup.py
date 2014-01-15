@@ -6,8 +6,8 @@ if (sys.version_info < (2, 7)) or (sys.version_info >= (3, 0)):
     print("This package needs Python 2.7 to run.")
     sys.exit(1)
 
-from ez_setup import use_setuptools
-use_setuptools()
+#from ez_setup import use_setuptools
+#use_setuptools()
 from setuptools import setup
 from setuptools.command.test import test as TestCommand
 
