@@ -11,23 +11,6 @@ if (sys.version_info < (2, 7)) or (sys.version_info >= (3, 0)):
 from setuptools import setup
 from setuptools.command.test import test as TestCommand
 
-
-# to install: ./setup.py install
-# use the --user flag to install for current user only (recommended)
-# Note: this will install setuptools >=2.0.2 if not yet available on the system
-#
-# to run tests: ./setup.py test
-# to install in develop mode: ./setup.py develop --user
-
-# You should inform your users that if they are installing your project to
-# somewhere other than the main site-packages directory, they should first
-# install setuptools using the instructions for Custom Installation Locations,
-# before installing your project.
-# Note, however, that they must still install those projects using easy_install
-# , or your project will not know they are installed, and your setup script
-# will try to download them again.)
-
-
 # calling py.test
 class PyTest(TestCommand):
     def finalize_options(self):
@@ -46,7 +29,7 @@ class PyTest(TestCommand):
 
 
 setup(name='ofStateManager',
-      version='1.0',
+      version='1.0.1',
       description=('Leverages git to help you organize and archive ' +
                    'your openFrameworks projects'),
       author='Christoph Buchner',

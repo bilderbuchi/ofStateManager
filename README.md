@@ -1,4 +1,4 @@
-# ofStateManager 1.0 [![Build Status](https://travis-ci.org/bilderbuchi/ofStateManager.png?branch=master)](https://travis-ci.org/bilderbuchi/ofStateManager)
+# ofStateManager 1.0.1 [![Build Status](https://travis-ci.org/bilderbuchi/ofStateManager.png?branch=master)](https://travis-ci.org/bilderbuchi/ofStateManager)
 
 ##Description
 This script helps you organize and archive your openFrameworks projects.
@@ -21,11 +21,12 @@ A suite of automated tests puts the code through its paces, but in-the-field use
 ## Installation
 There are several alternative ways to install `ofStateManager`, pick what you prefer:
 
-* Run `python setup.py --user` in the root directory. This will automatically fetch and install all Python dependencies for the current user, then install `ofStateManager` where your shell can find it. 
-*Advanced users: Note that this will also install a current version of `setuptools`. If you are typically using a package manager (e.g. on Linux or Mac) to install python modules, it's better to first install the dependencies that way to keep track of installed packages. (Yes, universal Python packaging/distribution is a bit of a mess.)*
-* You can run ``python setup.py` (i.e. without the `--user` flag) to install `ofStateManager` system-wide. This will typically require admin privileges.
-* Make sure the dependencies are installed, then [download](https://github.com/bilderbuchi/ofStateManager/releases) ofStateManager, and link to `ofStateManager.py` from somewhere in your `PATH` (e.g. `~/.local/bin/` on Ubuntu) so that your shell can find it, then use it in your projects.
-* Make sure the dependencies are installed, then you can put just `ofStateManager.py` directly in a directory on your `PATH`.
+* (Recommended) Use [pip](http://www.pip-installer.org/en/latest/) to install for your user only, directly from Github: `pip install --user git+https://github.com/bilderbuchi/ofStateManager.git@1.0.1`
+* You can also [download a release](https://github.com/bilderbuchi/ofStateManager/releases) from Github and then run "`pip install --user .`" in the extracted directory.
+* You can omit the `--user` flag to install `ofStateManager` system-wide. This will typically require admin privileges.
+* If you prefer a manual approach, you can also just put `ofStateManager.py` somewere on your `$PATH`, so that your shell can find it.
+
+Finally, `pip` enables you to upgrade (`pip install --upgrade...`) or uninstall (`pip uninstall ofStateManager`) `ofStateManager` in the same manner.
 
 ##Commands
 
@@ -145,18 +146,19 @@ This can be useful if `ofStateManager.py` is not on your `PATH`, and you have to
 * `ofStatemanager.py record -u --name releaseV1.1` as previous, but updates the snapshot if it already exists.
 
 
-
 ## Testing
 
 To run automated tests on ofStateManager, you'll need [py.test](http://pytest.org/) (>=2.3.4).
 Run `py.test` in the project's `tests` directory to run the tests. All tests should pass.
-You can alternatively run `setup.py test` to automatically fetch the dependencies for testing, then run the tests. Same caveats as for installation apply.
 
 To also get coverage information, you need [coverage.py](http://nedbatchelder.com/code/coverage/).
-Run `run_coverage.py` in the `tests` directory. The tests run, and you should end up with a short coverage percentage report on the command line and an annotated html version of the code in `tests/htmlcov`.
+Run `./run_coverage.py` in the `tests` directory. The tests run, and you should end up with a short coverage percentage report on the command line and an annotated html version of the code in `tests/htmlcov`.
 Be aware that `coverage` has to be correctly set up to collect [subprocess information](http://nedbatchelder.com/code/coverage/subprocess.html), first.
+
+You can run `pip install -e .[test]` to automatically fetch and install the dependencies for testing for you.
+
 
 ## License
 The code in this repository is available under the MIT License (see license.md).
 
-Copyright (c) 2012 - Christoph Buchner
+Copyright (c) 2014 - Christoph Buchner
