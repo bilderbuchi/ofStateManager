@@ -2,19 +2,17 @@ language: python
 python:
   - "2.7"
 
-# whitelist
-branches:
-  only:
-    - distribution
-
-# command to install dependencies
+# install dependencies
 install:
   - pip install .
   - pip install -e .[test]
-# command to run tests
+
+before_script:
+#  Enable subprocess measurement for coverage
+  - echo "import coverage; coverage.process_startup()" > subproc.pth
+  - cp subproc.pth $HOME/virtualenv/python$TRAVIS_PYTHON_VERSION/lib/python$TRAVIS_PYTHON_VERSION/site-packages/
+
+# run tests
 script:
   - py.test
-  - echo "import coverage; coverage.process_startup()" > subproc.pth
-  - cat subproc.pth
-  - cp subproc.pth $HOME/virtualenv/python$TRAVIS_PYTHON_VERSION/lib/python$TRAVIS_PYTHON_VERSION/site-packages/
-  - "python tests/run_coverage.py"
+  - python tests/run_coverage.py
