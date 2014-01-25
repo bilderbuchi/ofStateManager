@@ -1,4 +1,4 @@
-# ofStateManager 1.0.1 [![Build Status](https://travis-ci.org/bilderbuchi/ofStateManager.png?branch=master)](https://travis-ci.org/bilderbuchi/ofStateManager)
+# ofStateManager 1.1 [![Build Status](https://travis-ci.org/bilderbuchi/ofStateManager.png?branch=master)](https://travis-ci.org/bilderbuchi/ofStateManager)
 
 ##Description
 This script helps you organize and archive your openFrameworks projects.
@@ -11,7 +11,7 @@ A suite of automated tests puts the code through its paces, but in-the-field use
 
 ## Requirements/Dependencies
 * OS: Only Linux is tested, MacOS should work, too. Full cross-platformness is intended.
-* Python: Python 2.7
+* Python: Python 2.7 or 3.3
 * git
 * A basic shell - grep, |, pwd, tar
 * A correct `config.make` has to be present in your project. An `addons.make` file is optional, but necessary if you use any addons in your project.
@@ -21,7 +21,7 @@ A suite of automated tests puts the code through its paces, but in-the-field use
 ## Installation
 There are several alternative ways to install `ofStateManager`, pick what you prefer:
 
-* (Recommended) Use [pip](http://www.pip-installer.org/en/latest/) to install for your user only, directly from Github: `pip install --user git+https://github.com/bilderbuchi/ofStateManager.git@1.0.1`
+* (Recommended) Use [pip](http://www.pip-installer.org/en/latest/) to install for your user only, directly from Github: `pip install --user git+https://github.com/bilderbuchi/ofStateManager.git@1.1`
 * You can also [download a release](https://github.com/bilderbuchi/ofStateManager/releases) from Github and then run "`pip install --user .`" in the extracted directory.
 * You can omit the `--user` flag to install `ofStateManager` system-wide. This will typically require admin privileges.
 * If you prefer a manual approach, you can also just put `ofStateManager.py` somewere on your `$PATH`, so that your shell can find it.
@@ -154,6 +154,8 @@ Run `py.test` in the project's `tests` directory to run the tests. All tests sho
 To also get coverage information, you need [coverage.py](http://nedbatchelder.com/code/coverage/).
 Run `./run_coverage.py` in the `tests` directory. The tests run, and you should end up with a short coverage percentage report on the command line and an annotated html version of the code in `tests/htmlcov`.
 Be aware that `coverage` has to be correctly set up to collect [subprocess information](http://nedbatchelder.com/code/coverage/subprocess.html), first.
+
+[Tox](tox.readthedocs.org/) can be used to automatically test coverage across all supported Python versions. Simply install and run `tox`.
 
 You can run `pip install -e .[test]` to automatically fetch and install the dependencies for testing for you.
 

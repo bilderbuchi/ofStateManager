@@ -2,8 +2,9 @@
 
 import sys
 # Check for correct Python version
-if sys.version_info < (2, 7):
-    print("This package needs Python 2.7 or 3.x to run.")
+if ((sys.version_info.major, sys.version_info.minor) != (2, 7) and
+    (sys.version_info.major, sys.version_info.minor) != (3, 3)):
+    print("This package needs Python 2.7 or 3.3 to run.")
     sys.exit(1)
 
 #from ez_setup import use_setuptools
@@ -29,7 +30,7 @@ class PyTest(TestCommand):
         sys.exit(errno)
 
 setup(name='ofStateManager',
-      version='1.0.1',
+      version='1.1',
       description=('Leverages git to help you organize and archive ' +
                    'your openFrameworks projects'),
       author='Christoph Buchner',
