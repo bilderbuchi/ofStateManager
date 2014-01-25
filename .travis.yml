@@ -1,18 +1,17 @@
 language: python
-python:
-  - "2.7"
-  - "3.3"
+
+python: "2.7"
+
+env:
+  - TOXENV=py27
+  - TOXENV=py33
 
 # install dependencies
 install:
+  - pip install tox --use-mirrors
   - pip install .
   - pip install -e .[test]
 
-before_script:
-#  Enable subprocess measurement for coverage
-  - echo "import coverage; coverage.process_startup()" > subproc.pth
-  - cp subproc.pth $HOME/virtualenv/python$TRAVIS_PYTHON_VERSION/lib/python$TRAVIS_PYTHON_VERSION/site-packages/
-
 # run tests
-script:
-  - python tests/run_coverage.py
+script: tox
+
