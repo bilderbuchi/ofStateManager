@@ -14,7 +14,7 @@ def set_up(tmpdir):
     tar.extractall()
     tar.close()
     os.chdir('MockRepos')
-    print('In directory ' + os.getcwd())
+    print(('In directory ' + os.getcwd()))
     # does not need teardown, since tmpdir directories get autodeleted
 
 
