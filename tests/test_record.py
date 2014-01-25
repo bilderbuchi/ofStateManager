@@ -65,7 +65,7 @@ class TestRecord:
         _, err = run_ofSM('record -p mockProjectWRONG', capfd=capfd,
                           desired_exit_status=1)
         # Do this because subprocess does not raise its child's exceptions
-        assert 'OSError: [Errno 2]' in err
+        assert 'Error: [Errno 2]' in err
 
     def test_record_update(self):
         # copy snapshot-1 metadata file over to mockProject
