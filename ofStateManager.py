@@ -140,7 +140,8 @@ def record(args, filename):
         return 1
 
     LOGGER.debug('Recording commit SHA')
-    out = subprocess.check_output(['git', 'rev-parse', 'HEAD'])
+    out = subprocess.check_output(['git', 'rev-parse', 'HEAD'],
+                                  universal_newlines=True)
     core_dict['sha'] = out.strip()
     LOGGER.debug('OF commit SHA: ' + core_dict['sha'])
 
@@ -176,7 +177,8 @@ def record(args, filename):
 
         ret = validate_git_repo(strict=False)
         if ret == 0:
-            out_string = subprocess.check_output(['git', 'rev-parse', 'HEAD'])
+            out_string = subprocess.check_output(['git', 'rev-parse', 'HEAD'],
+                                                 universal_newlines=True)
             addon['sha'] = out_string.strip()
         elif ret == 2:
             addon['sha'] = 'non-git'
@@ -344,7 +346,7 @@ def get_branchname(target_sha):
                                  '--sort=authordate',
                                  '--python',
                                  '--format=%(objectname): %(refname:short),',
-                                 'refs/heads/']) +
+                                 'refs/heads/'], universal_newlines=True) +
         '}')
 
     try:
