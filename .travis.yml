@@ -8,9 +8,8 @@ env:
 
 # install dependencies
 install:
-  - pip install tox --use-mirrors
+  - pip install tox
   - pip install .
-  - pip install -e .[test]
 
 # run tests
 script: tox
