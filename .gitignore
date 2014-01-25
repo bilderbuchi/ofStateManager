@@ -5,6 +5,8 @@
 /tests/.coverage.*
 /tests/htmlcov
 MockRepos/
+/.tox
+/subproc.pth
 
 addons.make
 config.make
